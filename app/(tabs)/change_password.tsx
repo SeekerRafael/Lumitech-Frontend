@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity } from 'react-native';
-import { AuthService } from '../auth/auth.service';
+import { View, Text, TextInput, Alert, TouchableOpacity, Image, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
-
-const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/;
+import { AuthService } from '../auth/auth.service';
+import { theme } from '../../constants/theme';
+import { validatePasswordReset, PasswordResetErrors } from '../../utils/validators';
 
 const ChangePasswordScreen = () => {
   const router = useRouter();
@@ -15,7 +15,6 @@ const ChangePasswordScreen = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Estado para errores
   const [errors, setErrors] = useState<{
     currentPassword?: string;
     newPassword?: string;
@@ -23,23 +22,11 @@ const ChangePasswordScreen = () => {
   }>({});
 
   const validateInputs = () => {
-    const newErrors: typeof errors = {};
+    const validationErrors: PasswordResetErrors = validatePasswordReset(newPassword, confirmPassword);
+    const newErrors = { ...validationErrors };
 
     if (!currentPassword.trim()) {
       newErrors.currentPassword = 'La contraseña actual no puede estar vacía.';
-    }
-
-    if (!newPassword.trim()) {
-      newErrors.newPassword = 'La nueva contraseña no puede estar vacía.';
-    } else if (newPassword.length < 8 || newPassword.length > 15) {
-      newErrors.newPassword = 'La contraseña debe tener entre 8 y 15 caracteres.';
-    } else if (!passwordRegex.test(newPassword)) {
-      newErrors.newPassword =
-        'La contraseña debe contener al menos una mayúscula, una minúscula, un número y un símbolo.';
-    }
-
-    if (confirmPassword !== newPassword) {
-      newErrors.confirmPassword = 'Las contraseñas no coinciden.';
     }
 
     setErrors(newErrors);
@@ -47,27 +34,32 @@ const ChangePasswordScreen = () => {
   };
 
   const handleChangePassword = async () => {
-    if (!validateInputs()) {
-      return;
-    }
+    if (!validateInputs()) return;
 
     try {
       await AuthService.changePassword(currentPassword, newPassword);
       Alert.alert('Éxito', 'Contraseña actualizada');
       router.back();
     } catch (error: any) {
-      // console.error(error);
       Alert.alert('Error', error.response?.data?.message || 'No se pudo cambiar la contraseña');
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Contraseña actual:</Text>
-      <View style={styles.passwordContainer}>
+    <View style={theme.containerTerciario}>
+      <Image
+        source={require('../../assets/images/logo3.png')}
+        style={theme.logoSecundario}
+        resizeMode="contain"
+      />
+      <Text style={theme.title}>Cambiar Contraseña</Text>
+
+      {/* Contraseña actual */}
+      <Text style={theme.label}>Contraseña actual:</Text>
+      <View style={theme.passwordContainer}>
         <TextInput
           secureTextEntry={!showCurrentPassword}
-          style={styles.passwordInput}
+          style={theme.passwordInput}
           value={currentPassword}
           onChangeText={text => {
             setCurrentPassword(text);
@@ -77,7 +69,7 @@ const ChangePasswordScreen = () => {
           }}
         />
         <TouchableOpacity
-          style={styles.iconButton}
+          style={theme.iconButton}
           onPress={() => setShowCurrentPassword(!showCurrentPassword)}
         >
           <MaterialIcons
@@ -87,13 +79,16 @@ const ChangePasswordScreen = () => {
           />
         </TouchableOpacity>
       </View>
-      {errors.currentPassword && <Text style={styles.errorText}>{errors.currentPassword}</Text>}
+      {errors.currentPassword && (
+        <Text style={theme.errorText}>{errors.currentPassword}</Text>
+      )}
 
-      <Text style={styles.label}>Nueva contraseña:</Text>
-      <View style={styles.passwordContainer}>
+      {/* Nueva contraseña */}
+      <Text style={theme.label}>Nueva contraseña:</Text>
+      <View style={theme.passwordContainer}>
         <TextInput
           secureTextEntry={!showNewPassword}
-          style={styles.passwordInput}
+          style={theme.passwordInput}
           value={newPassword}
           onChangeText={text => {
             setNewPassword(text);
@@ -103,7 +98,7 @@ const ChangePasswordScreen = () => {
           }}
         />
         <TouchableOpacity
-          style={styles.iconButton}
+          style={theme.iconButton}
           onPress={() => setShowNewPassword(!showNewPassword)}
         >
           <MaterialIcons
@@ -113,13 +108,16 @@ const ChangePasswordScreen = () => {
           />
         </TouchableOpacity>
       </View>
-      {errors.newPassword && <Text style={styles.errorText}>{errors.newPassword}</Text>}
+      {errors.newPassword && (
+        <Text style={theme.errorText}>{errors.newPassword}</Text>
+      )}
 
-      <Text style={styles.label}>Confirmar nueva contraseña:</Text>
-      <View style={styles.passwordContainer}>
+      {/* Confirmar contraseña */}
+      <Text style={theme.label}>Confirmar nueva contraseña:</Text>
+      <View style={theme.passwordContainer}>
         <TextInput
           secureTextEntry={!showConfirmPassword}
-          style={styles.passwordInput}
+          style={theme.passwordInput}
           value={confirmPassword}
           onChangeText={text => {
             setConfirmPassword(text);
@@ -129,7 +127,7 @@ const ChangePasswordScreen = () => {
           }}
         />
         <TouchableOpacity
-          style={styles.iconButton}
+          style={theme.iconButton}
           onPress={() => setShowConfirmPassword(!showConfirmPassword)}
         >
           <MaterialIcons
@@ -139,38 +137,24 @@ const ChangePasswordScreen = () => {
           />
         </TouchableOpacity>
       </View>
-      {errors.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword}</Text>}
+      {errors.confirmPassword && (
+        <Text style={theme.errorText}>{errors.confirmPassword}</Text>
+      )}
 
-      <Button title="Cambiar contraseña" onPress={handleChangePassword} />
+      {/* Botones */}
+      <View style={theme.buttonsRow}>
+        <Pressable
+          style={[theme.rightButton]}
+          onPress={() => router.back()}
+        >
+          <Text style={theme.buttonTextS}>Cancelar</Text>
+        </Pressable>
+        <Pressable style={theme.leftButton} onPress={handleChangePassword}>
+          <Text style={theme.buttonTextS}>Cambiar contraseña</Text>
+        </Pressable>
+      </View>
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#fff' },
-  label: { fontSize: 16, marginBottom: 5 },
-  passwordContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    marginBottom: 5,
-  },
-  passwordInput: {
-    flex: 1,
-    padding: 10,
-  },
-  iconButton: {
-    padding: 10,
-  },
-  errorText: {
-    color: 'red',
-    marginBottom: 10,
-    fontSize: 14,
-  },
-});
-
 export default ChangePasswordScreen;
-
-

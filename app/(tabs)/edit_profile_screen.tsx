@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Button } from 'react-native';
+import { View, Text, TextInput, Image, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
+import { theme } from '../../constants/theme';
 
 type EditField = 'name' | 'lastname' | 'nickname';
 
@@ -33,23 +34,36 @@ const EditProfileScreen = () => {
   const { field, currentValue } = route.params;
 
   const [newValue, setNewValue] = useState('');
-  const [error, setError] = useState<string | null>(null); // Estado para errores
+  const [error, setError] = useState<string | null>(null);
 
   const handleSave = async () => {
-    setError(null); // Limpiar error previo
+    setError(null);
 
-    if (!newValue.trim()) {
+    const trimmedValue = newValue.trim();
+
+    if (!trimmedValue) {
       setError('El nuevo valor no puede estar vacío');
+      return;
+    }
+
+    if (trimmedValue === currentValue) {
+      setError('El nuevo valor no puede ser igual al valor actual');
       return;
     }
 
     try {
       const token = await AsyncStorage.getItem('userToken');
-
       if (!token) {
         setError('No se encontró el token');
         return;
       }
+
+      const bodyPayload =
+        field === 'name'
+          ? { userName: trimmedValue }
+          : field === 'lastname'
+          ? { userLastName: trimmedValue }
+          : { nickName: trimmedValue };
 
       const response = await fetch(`${BASE_URL}/user/${endpointMap[field]}`, {
         method: 'PATCH',
@@ -57,13 +71,7 @@ const EditProfileScreen = () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          [field === 'name'
-            ? 'userName'
-            : field === 'lastname'
-            ? 'userLastName'
-            : 'nickName']: newValue,
-        }),
+        body: JSON.stringify(bodyPayload),
       });
 
       if (!response.ok) {
@@ -72,7 +80,6 @@ const EditProfileScreen = () => {
         return;
       }
 
-      // Si todo salió bien
       navigation.goBack();
     } catch (err: any) {
       setError(err.message || 'No se pudo actualizar');
@@ -80,55 +87,44 @@ const EditProfileScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Editar {fieldTitles[field]}</Text>
+    <View style={theme.containerTerciario}>
+      <Image
+        source={require('../../assets/images/logo3.png')}
+        style={theme.logoTerciario}
+        resizeMode="contain"
+      />
+      <Text style={theme.title}>Editar {fieldTitles[field]}</Text>
 
-      <Text style={styles.label}>Actual:</Text>
-      <Text style={styles.currentValue}>{currentValue}</Text>
+      <Text style={theme.label}>
+        Actual: <Text>{currentValue}</Text>
+      </Text>
 
-      <Text style={styles.label}>Nuevo:</Text>
+      <Text style={theme.label}>Nuevo:</Text>
       <TextInput
-        style={[styles.input, error ? styles.inputError : null]}
+        style={[theme.input, error ? theme.errorText : undefined]}
         placeholder={`Nuevo ${fieldTitles[field]}`}
         value={newValue}
         onChangeText={text => {
           setNewValue(text);
-          if (error) setError(null); // Quitar error al modificar el input
+          if (error) setError(null);
         }}
       />
-      {error && <Text style={styles.errorText}>{error}</Text>}
+      {error && <Text style={theme.errorText}>{error}</Text>}
 
-      <View style={styles.buttons}>
-        <Button title="Cancelar" color="#888" onPress={() => navigation.goBack()} />
-        <Button title="Guardar cambios" onPress={handleSave} />
+      <View style={theme.buttonsRow}>
+        <TouchableOpacity
+          style={theme.leftButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={theme.buttonTextS}>Cancelar</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={theme.rightButton} onPress={handleSave}>
+          <Text style={theme.buttonTextS}>Guardar cambios</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
-  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
-  label: { fontSize: 16, marginTop: 10 },
-  currentValue: { fontSize: 18, color: '#333', marginBottom: 10 },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    borderRadius: 6,
-    marginBottom: 5,
-  },
-  inputError: {
-    borderColor: 'red',
-  },
-  errorText: {
-    color: 'red',
-    marginBottom: 15,
-  },
-  buttons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-});
 
 export default EditProfileScreen;

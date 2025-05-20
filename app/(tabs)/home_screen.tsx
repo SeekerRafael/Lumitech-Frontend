@@ -1,10 +1,19 @@
-import React, { useState } from 'react';
-import { Text, View, ActivityIndicator, StyleSheet } from 'react-native';
-import { useAuth } from '../hooks/useAuth';
-import { IconButton, Menu, Portal, Dialog, Paragraph, Button } from 'react-native-paper';
-import { useRouter, useFocusEffect } from 'expo-router';
-import { AuthService } from '../auth/auth.service';
-
+import React, { useState, useCallback } from "react";
+import {
+  View,
+  Text,
+  ActivityIndicator,
+  Image,
+  TouchableOpacity,
+  BackHandler,
+} from "react-native";
+import { useAuth } from "../hooks/useAuth";
+import { useRouter, useFocusEffect } from "expo-router";
+import { AuthService } from "../auth/auth.service";
+import { MaterialIcons } from "@expo/vector-icons";
+import { theme, colors } from "../../constants/theme";
+import { Menu, Portal, Dialog, Paragraph, Button } from "react-native-paper";
+import { Ionicons } from "@expo/vector-icons";
 
 const HomeScreen = () => {
   const { user, isLoading, refreshUser } = useAuth();
@@ -19,10 +28,26 @@ const HomeScreen = () => {
     }, [])
   );
 
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        setLogoutDialogVisible(true);
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress
+      );
+
+      return () => subscription.remove();
+    }, [])
+  );
+
   if (isLoading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" />
+      <View style={theme.container}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -38,89 +63,128 @@ const HomeScreen = () => {
   const handleLogout = async () => {
     try {
       setLogoutDialogVisible(false);
-      await AuthService.logout(); 
-      router.replace('/auth/login_screen'); 
+      await AuthService.logout();
+      router.replace("/auth/login_screen");
     } catch (error) {
-      console.error('Error al cerrar sesión:', error);
+      console.error("Error al cerrar sesión:", error);
     }
   };
-  
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <View style={theme.container}>
+      <View style={theme.header}>
+        <Image
+          source={require("../../assets/images/logo3.png")}
+          style={theme.logoTerciario}
+          resizeMode="contain"
+        />
+
         <Menu
           visible={menuVisible}
           onDismiss={() => setMenuVisible(false)}
           anchor={
-            <IconButton icon="cog" size={28} onPress={() => setMenuVisible(true)} />
+            <TouchableOpacity
+              onPress={() => setMenuVisible(true)}
+              style={theme.settingsButton}
+            >
+              <MaterialIcons name="settings" size={28} color={colors.primary} />
+            </TouchableOpacity>
           }
+          contentStyle={{ backgroundColor: colors.background }}
         >
           <Menu.Item
             onPress={() => {
               setMenuVisible(false);
-              router.push('/(tabs)/profile_screen');
+              router.push("/(tabs)/profile_screen");
             }}
-            title="Perfil"
+            title={
+              <View style={theme.menuItemContainer}>
+                <MaterialIcons name="person" size={20} color={colors.primary} />
+                <Text style={theme.menuItemText}>Perfil</Text>
+              </View>
+            }
           />
           <Menu.Item
             onPress={() => {
               setMenuVisible(false);
-              router.push('/(tabs)/notifications_screen');
+              router.push("/(tabs)/notifications_screen");
             }}
-            title="Notificaciones"
+            title={
+              <View style={theme.menuItemContainer}>
+                <MaterialIcons
+                  name="notifications"
+                  size={20}
+                  color={colors.primary}
+                />
+                <Text style={theme.menuItemText}>Notificaciones</Text>
+              </View>
+            }
           />
           <Menu.Item
             onPress={() => {
               setMenuVisible(false);
               setLogoutDialogVisible(true);
             }}
-            title="Cerrar sesión"
+            title={
+              <View style={theme.menuItemContainer}>
+                <MaterialIcons name="logout" size={20} color={colors.error} />
+                <Text style={theme.menuItemDangerText}>Cerrar sesión</Text>
+              </View>
+            }
           />
         </Menu>
       </View>
+      
+      <View style={theme.content}>
+        <Text style={theme.welcomeTitle}>
+          Bienvenido, {user.name} {user.userLastName} a tu roseta inteligente
+        </Text>
 
-      <Text style={{ fontSize: 24, color: 'red' }}>
-        Bienvenido, {user.name} {user.userLastName} 👋
-      </Text>
-      <Text style={{ fontSize: 16, marginTop: 10 }}>
-        Usuario: {user.userNickName}
-      </Text>
-      <Text style={{ fontSize: 16 }}>
-        Correo: {user.email}
-      </Text>
-
-      <Button
-        mode="contained"
-        style={{ marginTop: 40, borderRadius: 8 }}
-        onPress={() => {}}
-      >
-        Agregar Dispositivo
-      </Button>
+        <TouchableOpacity
+          style={[theme.input, { marginTop: 30 }]}
+          onPress={() => router.push("/tutorial")}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Ionicons
+              name="add-circle-outline"
+              size={20}
+              color="white"
+              style={{ marginRight: 8 }}
+            />
+            <Text style={theme.buttonText}>Agregar Dispositivo</Text>
+          </View>
+        </TouchableOpacity>
+      </View>
 
       <Portal>
         <Dialog
           visible={logoutDialogVisible}
           onDismiss={() => setLogoutDialogVisible(false)}
+          style={{ backgroundColor: colors.background }}
         >
-          <Dialog.Title>Cerrar sesión</Dialog.Title>
+          <Dialog.Title style={{ color: colors.colorLetter }}>
+            Cerrar sesión
+          </Dialog.Title>
           <Dialog.Content>
-            <Paragraph>¿Deseas cerrar sesión?</Paragraph>
+            <Paragraph style={{ color: colors.colorLetter }}>
+              ¿Deseas cerrar sesión?
+            </Paragraph>
           </Dialog.Content>
           <Dialog.Actions>
-            <Button onPress={() => setLogoutDialogVisible(false)}>Cancelar</Button>
-            <Button onPress={handleLogout}>Cerrar sesión</Button>
+            <Button
+              onPress={() => setLogoutDialogVisible(false)}
+              textColor={colors.colorLetter}
+            >
+              Cancelar
+            </Button>
+            <Button onPress={handleLogout} textColor={colors.error}>
+              Cerrar sesión
+            </Button>
           </Dialog.Actions>
         </Dialog>
       </Portal>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, paddingTop: 50, backgroundColor: '#fff' },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  header: { alignItems: 'flex-end' },
-});
 
 export default HomeScreen;

@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  Button, 
-  StyleSheet, 
-  TouchableOpacity, 
-  ActivityIndicator 
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ActivityIndicator,
+  Image,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../hooks/useAuth';
 import { MaterialIcons } from '@expo/vector-icons';
+import { theme, colors } from '../../constants/theme';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -37,7 +40,6 @@ export default function LoginScreen() {
       router.replace('/(tabs)/home_screen');
     } catch (error: any) {
       let message = 'Error al iniciar sesión';
-
       if (error.response) {
         switch (error.response.status) {
           case 401:
@@ -53,7 +55,6 @@ export default function LoginScreen() {
             message = error.response.data?.message || message;
         }
       }
-
       setErrorMessage(message);
     } finally {
       setIsLoggingIn(false);
@@ -61,212 +62,126 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Iniciar Sesión</Text>
-      
-      <View style={styles.toggleContainer}>
-        <TouchableOpacity 
-          style={[styles.toggleButton, !isEmail && styles.activeToggle]}
-          onPress={() => setIsEmail(false)}
+    <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
         >
-          <Text style={[styles.toggleText, !isEmail && styles.activeToggleText]}>
-            Nickname
-          </Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={[styles.toggleButton, isEmail && styles.activeToggle]}
-          onPress={() => setIsEmail(true)}
-        >
-          <Text style={[styles.toggleText, isEmail && styles.activeToggleText]}>
-            Email
-          </Text>
-        </TouchableOpacity>
-      </View>
+      <ScrollView
+        contentContainerStyle={theme.container}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Image
+          source={require('../../assets/images/logo3.png')}
+          style={theme.logoSecundario}
+          resizeMode="contain"
+        />
 
-      <TextInput
-        style={styles.input}
-        placeholder={isEmail ? 'Correo electrónico' : 'Nombre de usuario'}
-        value={identifier}
-        onChangeText={(text) => {
-          setIdentifier(text);
-          setErrorMessage('');
-        }}
-        autoCapitalize="none"
-        keyboardType={isEmail ? 'email-address' : 'default'}
-        autoCorrect={false}
-      />
+        <Text style={theme.appNameS}>Lumitech</Text>
+        <Text style={theme.title}>Iniciar Sesión</Text>
 
-      <View style={styles.passwordContainer}>
+        <View style={theme.toggleContainer}>
+          <TouchableOpacity
+            style={[theme.toggleButton, !isEmail && theme.activeToggle]}
+            onPress={() => setIsEmail(false)}
+          >
+            <Text style={[theme.toggleText, !isEmail && theme.activeToggleText]}>Nickname</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[theme.toggleButton, isEmail && theme.activeToggle]}
+            onPress={() => setIsEmail(true)}
+          >
+            <Text style={[theme.toggleText, isEmail && theme.activeToggleText]}>Email</Text>
+          </TouchableOpacity>
+        </View>
+
+        <Text style={theme.label}>
+          {isEmail ? 'Correo electrónico' : 'Nombre de usuario'}
+        </Text>
         <TextInput
-          style={styles.passwordInput}
-          placeholder="Contraseña"
-          secureTextEntry={!showPassword}
-          value={password}
+          style={theme.input}
+          placeholder={isEmail ? 'Correo electrónico' : 'Nombre de usuario'}
+          value={identifier}
           onChangeText={(text) => {
-            setPassword(text);
+            setIdentifier(text);
             setErrorMessage('');
           }}
-          autoComplete="password"
+          autoCapitalize="none"
+          keyboardType={isEmail ? 'email-address' : 'default'}
         />
-        <TouchableOpacity 
-          style={styles.iconButton}
-          onPress={() => setShowPassword(!showPassword)}
-        >
-          <MaterialIcons 
-            name={showPassword ? 'visibility-off' : 'visibility'} 
-            size={24} 
-            color="#666" 
+
+        <Text style={theme.label}>Contraseña</Text>
+        <View style={theme.passwordContainer}>
+          <TextInput
+            style={{ flex: 1, padding: 10 }}
+            placeholder="Contraseña"
+            secureTextEntry={!showPassword}
+            value={password}
+            onChangeText={(text) => {
+              setPassword(text);
+              setErrorMessage('');
+            }}
+            autoComplete="password"
           />
-        </TouchableOpacity>
-      </View>
-
-      <TouchableOpacity 
-        style={styles.forgotPasswordLink}
-        onPress={() => router.push('/auth/forgot_password_screen')}
-      >
-        <Text style={styles.forgotPasswordText}>¿Olvidaste tu contraseña?</Text>
-      </TouchableOpacity>
-
-      {errorMessage !== '' && (
-        <Text style={styles.errorText}>{errorMessage}</Text>
-      )}
-
-      {(authLoading || isLoggingIn) ? (
-        <ActivityIndicator size="large" color="#007AFF" style={styles.loader} />
-      ) : (
-        <>
-          <View style={styles.buttonContainer}>
-            <Button
-              title="Iniciar Sesión"
-              onPress={handleLogin}
-              color="#007AFF"
-            />
-          </View>
-          
-          <View style={styles.registerContainer}>
-            <Text style={styles.registerText}>¿No tienes una cuenta?</Text>
-            <Button
-              title="Regístrate"
-              onPress={() => router.push('/auth/register_screen')}
+          <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={{ padding: 10 }}>
+            <MaterialIcons
+              name={showPassword ? 'visibility-off' : 'visibility'}
+              size={24}
               color="#666"
             />
-          </View>
-
-          <TouchableOpacity 
-            style={styles.verifyEmailLink}
-            onPress={() => router.push('/auth/verify_email')}
-          >
-            <Text style={styles.verifyEmailText}>¿No has verificado tu correo? Verificar ahora</Text>
           </TouchableOpacity>
-        </>
-      )}
-    </View>
+        </View>
+
+        <TouchableOpacity onPress={() => router.push('/auth/forgot_password_screen')}>
+          <Text style={{ alignSelf: 'flex-end', color: colors.primary, marginVertical: 10 }}>
+            ¿Olvidaste tu contraseña?
+          </Text>
+        </TouchableOpacity>
+
+        {errorMessage !== '' && (
+          <Text style={{ color: colors.error, marginBottom: 10, textAlign: 'center' }}>
+            {errorMessage}
+          </Text>
+        )}
+
+        {(authLoading || isLoggingIn) ? (
+          <ActivityIndicator size="large" color={colors.primary} />
+        ) : (
+          <>
+            <TouchableOpacity style={theme.button} onPress={handleLogin}>
+              <Text style={theme.buttonText}>Iniciar Sesión</Text>
+            </TouchableOpacity>
+
+            <View style={{ marginTop: 20, alignItems: 'center' }}>
+              <Text style={{ color: '#666' }}>¿No tienes una cuenta?</Text>
+              <TouchableOpacity onPress={() => router.push('/auth/register_screen')}>
+                <Text style={{ color: colors.primary, marginTop: 5 }}>Regístrate</Text>
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity
+              onPress={() => router.push('/auth/verify_email')}
+              style={{ marginTop: 20 }}
+            >
+              <Text style={{ textAlign: 'center', color: colors.primary, textDecorationLine: 'underline' }}>
+                ¿No has verificado tu correo? Verificar ahora
+              </Text>
+            </TouchableOpacity>
+          </>
+        )}
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    justifyContent: 'center',
-    backgroundColor: '#fff',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 30,
-    color: '#333',
-  },
-  toggleContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: 20,
-    gap: 10,
-  },
-  toggleButton: {
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    width: '45%',
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-  },
-  activeToggle: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
-  },
-  toggleText: {
-    color: '#333',
-    fontWeight: '500',
-  },
-  activeToggleText: {
-    color: 'white',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 8, 
-    fontSize: 16,
-    backgroundColor: '#fff',
-  },
-  passwordContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    marginBottom: 8,
-    backgroundColor: '#fff',
-  },
-  passwordInput: {
-    flex: 1,
-    padding: 12,
-    fontSize: 16,
-  },
-  iconButton: {
-    padding: 10,
-  },
-  forgotPasswordLink: {
-    alignSelf: 'flex-end',
-    marginBottom: 10,
-  },
-  forgotPasswordText: {
-    color: '#007AFF',
-    fontSize: 14,
-  },
-  errorText: {
-    color: 'red',
-    fontSize: 14,
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  buttonContainer: {
-    marginTop: 10,
-  },
-  registerContainer: {
-    marginTop: 25,
-    alignItems: 'center',
-    gap: 5,
-  },
-  registerText: {
-    marginBottom: 5,
-    color: '#666',
-  },
-  loader: {
-    marginVertical: 20,
-  },
-  verifyEmailLink: {
-    marginVertical: 10,
-    alignSelf: 'center',
-  },
-  verifyEmailText: {
-    color: '#007AFF',
-    fontSize: 14,
-    textDecorationLine: 'underline',
-  },
-});
+
+
+
+
+
+
+
+
+
+
+
