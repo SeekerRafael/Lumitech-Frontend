@@ -14,7 +14,7 @@ import { useRouter } from "expo-router";
 import axios from "axios";
 import Constants from "expo-constants";
 import { theme } from "../../constants/theme";
-import { validateEmail } from "../../utils/validators"; 
+import { validateEmail } from "../../utils/validators";
 
 const BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
 const API_URL = `${BASE_URL}/user`;

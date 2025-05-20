@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, Text, Image, TouchableOpacity } from 'react-native';
-import { useRouter } from 'expo-router';
-import { theme } from '../constants/theme';
+import React from "react";
+import { View, Text, Image, TouchableOpacity } from "react-native";
+import { useRouter } from "expo-router";
+import { theme } from "../constants/theme";
 
 export default function WelcomeScreen() {
   const router = useRouter();
@@ -9,7 +9,7 @@ export default function WelcomeScreen() {
   return (
     <View style={theme.homeContainer}>
       <Image
-        source={require('../assets/images/logo2.png')}
+        source={require("../assets/images/logo2.png")}
         style={theme.logoPrincipal}
         resizeMode="contain"
       />
@@ -17,26 +17,17 @@ export default function WelcomeScreen() {
 
       <TouchableOpacity
         style={theme.button}
-        onPress={() => router.push('/auth/login_screen')}
+        onPress={() => router.push("/auth/login_screen")}
       >
         <Text style={theme.buttonText}>Iniciar Sesión</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={theme.button}
-        onPress={() => router.push('/auth/register_screen')}
+        onPress={() => router.push("/auth/register_screen")}
       >
         <Text style={theme.buttonText}>Registrarse</Text>
       </TouchableOpacity>
     </View>
   );
 }
-
-
-
-
-
-
-
-
-

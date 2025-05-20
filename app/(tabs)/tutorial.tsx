@@ -9,25 +9,38 @@ const TutorialScreen = () => {
 
   return (
     <View style={styles.containerAnimation}>
-      <Text style={styles.titleAnimation}>Cómo activar WiFi y seleccionar tu dispositivo</Text>
+      <Text style={styles.titleAnimation}>
+        Cómo activar WiFi y seleccionar tu dispositivo
+      </Text>
 
-      <Animatable.View animation="fadeInDown" duration={1000} style={styles.stepContainerAnimation}>
+      <Animatable.View
+        animation="fadeInDown"
+        duration={1000}
+        style={styles.stepContainerAnimation}
+      >
         <Text style={styles.stepTitleAnimation}>1. Activa tu WiFi</Text>
-        <Animatable.Text 
-          animation="pulse" 
-          iterationCount="infinite" 
-          direction="alternate" 
+        <Animatable.Text
+          animation="pulse"
+          iterationCount="infinite"
+          direction="alternate"
           style={styles.highlightTextAnimation}
         >
           Desliza hacia abajo y activa el WiFi
         </Animatable.Text>
       </Animatable.View>
 
-      <Animatable.View animation="fadeInUp" duration={1000} delay={1000} style={styles.stepContainerAnimation}>
-        <Text style={styles.stepTitleAnimation}>2. Selecciona tu dispositivo</Text>
-        <Animatable.Text 
-          animation="bounceIn" 
-          duration={1500} 
+      <Animatable.View
+        animation="fadeInUp"
+        duration={1000}
+        delay={1000}
+        style={styles.stepContainerAnimation}
+      >
+        <Text style={styles.stepTitleAnimation}>
+          2. Selecciona tu dispositivo
+        </Text>
+        <Animatable.Text
+          animation="bounceIn"
+          duration={1500}
           style={[styles.highlightTextAnimation, { fontWeight: "bold" }]}
         >
           Wifi_roseta
@@ -36,7 +49,7 @@ const TutorialScreen = () => {
 
       <TouchableOpacity
         style={theme.input}
-        onPress={() => router.push("/(tabs)/home_screen")} 
+        onPress={() => router.push("/(tabs)/home_screen")}
       >
         <Text style={theme.buttonText}>¡Listo, empezar!</Text>
       </TouchableOpacity>

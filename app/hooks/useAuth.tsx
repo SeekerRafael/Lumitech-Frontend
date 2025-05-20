@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
-import { AuthService } from '../auth/auth.service';
-import { User } from '../../interfaces/types';
-import { StorageService } from '../../services/storage.service';
+import { useState, useEffect, useCallback } from "react";
+import { AuthService } from "../auth/auth.service";
+import { User } from "../../interfaces/types";
+import { StorageService } from "../../services/storage.service";
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -9,7 +9,7 @@ export function useAuth() {
 
   const loadUser = useCallback(async () => {
     try {
-      const token = await StorageService.getItem('userToken');
+      const token = await StorageService.getItem("userToken");
 
       if (!token) {
         setUser(null);
@@ -17,10 +17,10 @@ export function useAuth() {
       }
 
       const fullProfile = await AuthService.getUserProfile();
-      console.log('Perfil completo cargado:', fullProfile);
+      console.log("Perfil completo cargado:", fullProfile);
       setUser(fullProfile);
     } catch (error) {
-      console.error('Error al cargar perfil:', error);
+      console.error("Error al cargar perfil:", error);
 
       const fallbackUser = await AuthService.getCurrentUser();
       setUser(fallbackUser);
@@ -47,6 +47,3 @@ export function useAuth() {
     refreshUser,
   };
 }
-
-
-

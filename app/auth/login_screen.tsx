@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -9,47 +9,47 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-} from 'react-native';
-import { useRouter } from 'expo-router';
-import { useAuth } from '../hooks/useAuth';
-import { MaterialIcons } from '@expo/vector-icons';
-import { theme, colors } from '../../constants/theme';
+} from "react-native";
+import { useRouter } from "expo-router";
+import { useAuth } from "../hooks/useAuth";
+import { MaterialIcons } from "@expo/vector-icons";
+import { theme, colors } from "../../constants/theme";
 
 export default function LoginScreen() {
   const router = useRouter();
   const { login, isLoading: authLoading } = useAuth();
 
-  const [identifier, setIdentifier] = useState('');
-  const [password, setPassword] = useState('');
+  const [identifier, setIdentifier] = useState("");
+  const [password, setPassword] = useState("");
   const [isEmail, setIsEmail] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleLogin = async () => {
     if (!identifier || !password) {
-      setErrorMessage('Por favor completa todos los campos');
+      setErrorMessage("Por favor completa todos los campos");
       return;
     }
 
-    setErrorMessage('');
+    setErrorMessage("");
     setIsLoggingIn(true);
 
     try {
       await login(identifier, password, isEmail);
-      router.replace('/(tabs)/home_screen');
+      router.replace("/(tabs)/home_screen");
     } catch (error: any) {
-      let message = 'Error al iniciar sesión';
+      let message = "Error al iniciar sesión";
       if (error.response) {
         switch (error.response.status) {
           case 401:
-            message = 'Credenciales incorrectas';
+            message = "Credenciales incorrectas";
             break;
           case 403:
-            message = 'Por favor verifica tu email antes de iniciar sesión';
+            message = "Por favor verifica tu email antes de iniciar sesión";
             break;
           case 404:
-            message = 'Usuario no encontrado';
+            message = "Usuario no encontrado";
             break;
           default:
             message = error.response.data?.message || message;
@@ -63,16 +63,16 @@ export default function LoginScreen() {
 
   return (
     <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
-        >
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+    >
       <ScrollView
         contentContainerStyle={theme.container}
         keyboardShouldPersistTaps="handled"
       >
         <Image
-          source={require('../../assets/images/logo3.png')}
+          source={require("../../assets/images/logo3.png")}
           style={theme.logoSecundario}
           resizeMode="contain"
         />
@@ -85,29 +85,35 @@ export default function LoginScreen() {
             style={[theme.toggleButton, !isEmail && theme.activeToggle]}
             onPress={() => setIsEmail(false)}
           >
-            <Text style={[theme.toggleText, !isEmail && theme.activeToggleText]}>Nickname</Text>
+            <Text
+              style={[theme.toggleText, !isEmail && theme.activeToggleText]}
+            >
+              Nickname
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[theme.toggleButton, isEmail && theme.activeToggle]}
             onPress={() => setIsEmail(true)}
           >
-            <Text style={[theme.toggleText, isEmail && theme.activeToggleText]}>Email</Text>
+            <Text style={[theme.toggleText, isEmail && theme.activeToggleText]}>
+              Email
+            </Text>
           </TouchableOpacity>
         </View>
 
         <Text style={theme.label}>
-          {isEmail ? 'Correo electrónico' : 'Nombre de usuario'}
+          {isEmail ? "Correo electrónico" : "Nombre de usuario"}
         </Text>
         <TextInput
           style={theme.input}
-          placeholder={isEmail ? 'Correo electrónico' : 'Nombre de usuario'}
+          placeholder={isEmail ? "Correo electrónico" : "Nombre de usuario"}
           value={identifier}
           onChangeText={(text) => {
             setIdentifier(text);
-            setErrorMessage('');
+            setErrorMessage("");
           }}
           autoCapitalize="none"
-          keyboardType={isEmail ? 'email-address' : 'default'}
+          keyboardType={isEmail ? "email-address" : "default"}
         />
 
         <Text style={theme.label}>Contraseña</Text>
@@ -119,32 +125,49 @@ export default function LoginScreen() {
             value={password}
             onChangeText={(text) => {
               setPassword(text);
-              setErrorMessage('');
+              setErrorMessage("");
             }}
             autoComplete="password"
           />
-          <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={{ padding: 10 }}>
+          <TouchableOpacity
+            onPress={() => setShowPassword(!showPassword)}
+            style={{ padding: 10 }}
+          >
             <MaterialIcons
-              name={showPassword ? 'visibility-off' : 'visibility'}
+              name={showPassword ? "visibility-off" : "visibility"}
               size={24}
               color="#666"
             />
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity onPress={() => router.push('/auth/forgot_password_screen')}>
-          <Text style={{ alignSelf: 'flex-end', color: colors.primary, marginVertical: 10 }}>
+        <TouchableOpacity
+          onPress={() => router.push("/auth/forgot_password_screen")}
+        >
+          <Text
+            style={{
+              alignSelf: "flex-end",
+              color: colors.primary,
+              marginVertical: 10,
+            }}
+          >
             ¿Olvidaste tu contraseña?
           </Text>
         </TouchableOpacity>
 
-        {errorMessage !== '' && (
-          <Text style={{ color: colors.error, marginBottom: 10, textAlign: 'center' }}>
+        {errorMessage !== "" && (
+          <Text
+            style={{
+              color: colors.error,
+              marginBottom: 10,
+              textAlign: "center",
+            }}
+          >
             {errorMessage}
           </Text>
         )}
 
-        {(authLoading || isLoggingIn) ? (
+        {authLoading || isLoggingIn ? (
           <ActivityIndicator size="large" color={colors.primary} />
         ) : (
           <>
@@ -152,18 +175,28 @@ export default function LoginScreen() {
               <Text style={theme.buttonText}>Iniciar Sesión</Text>
             </TouchableOpacity>
 
-            <View style={{ marginTop: 20, alignItems: 'center' }}>
-              <Text style={{ color: '#666' }}>¿No tienes una cuenta?</Text>
-              <TouchableOpacity onPress={() => router.push('/auth/register_screen')}>
-                <Text style={{ color: colors.primary, marginTop: 5 }}>Regístrate</Text>
+            <View style={{ marginTop: 20, alignItems: "center" }}>
+              <Text style={{ color: "#666" }}>¿No tienes una cuenta?</Text>
+              <TouchableOpacity
+                onPress={() => router.push("/auth/register_screen")}
+              >
+                <Text style={{ color: colors.primary, marginTop: 5 }}>
+                  Regístrate
+                </Text>
               </TouchableOpacity>
             </View>
 
             <TouchableOpacity
-              onPress={() => router.push('/auth/verify_email')}
+              onPress={() => router.push("/auth/verify_email")}
               style={{ marginTop: 20 }}
             >
-              <Text style={{ textAlign: 'center', color: colors.primary, textDecorationLine: 'underline' }}>
+              <Text
+                style={{
+                  textAlign: "center",
+                  color: colors.primary,
+                  textDecorationLine: "underline",
+                }}
+              >
                 ¿No has verificado tu correo? Verificar ahora
               </Text>
             </TouchableOpacity>
@@ -173,15 +206,3 @@ export default function LoginScreen() {
     </KeyboardAvoidingView>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-

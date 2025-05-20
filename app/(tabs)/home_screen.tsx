@@ -134,7 +134,7 @@ const HomeScreen = () => {
           />
         </Menu>
       </View>
-      
+
       <View style={theme.content}>
         <Text style={theme.welcomeTitle}>
           Bienvenido, {user.name} {user.userLastName} a tu roseta inteligente

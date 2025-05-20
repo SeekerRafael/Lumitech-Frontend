@@ -1,45 +1,45 @@
-import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  TextInput, 
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
   Alert,
   TouchableOpacity,
   Image,
   ActivityIndicator,
   ScrollView,
   KeyboardAvoidingView,
-  Platform
-} from 'react-native';
-import { registerUser } from '../../services/api';
-import { useRouter } from 'expo-router';
-import { MaterialIcons } from '@expo/vector-icons';
-import { theme, colors } from '../../constants/theme';
+  Platform,
+} from "react-native";
+import { registerUser } from "../../services/api";
+import { useRouter } from "expo-router";
+import { MaterialIcons } from "@expo/vector-icons";
+import { theme, colors } from "../../constants/theme";
 
 export default function RegisterScreen() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [formData, setFormData] = useState({
-    userName: '',
-    userLastName: '',
-    userNickName: '',
-    userEmail: '',
-    userPassword: '',
-    confirmPassword: '',
+    userName: "",
+    userLastName: "",
+    userNickName: "",
+    userEmail: "",
+    userPassword: "",
+    confirmPassword: "",
   });
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    setErrors(prev => ({ ...prev, [field]: '' }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    setErrors((prev) => ({ ...prev, [field]: "" }));
   };
 
   const handleRegister = async () => {
     const newErrors: { [key: string]: string } = {};
 
     if (formData.userPassword !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Las contraseñas no coinciden';
+      newErrors.confirmPassword = "Las contraseñas no coinciden";
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -52,24 +52,25 @@ export default function RegisterScreen() {
       setIsLoading(true);
       const { confirmPassword, ...payload } = formData;
       await registerUser(payload);
-      Alert.alert('Éxito', 'Usuario registrado correctamente');
-      router.replace('/auth/verify_account_screen');
+      Alert.alert("Éxito", "Usuario registrado correctamente");
+      router.replace("/auth/verify_account_screen");
     } catch (error: any) {
       if (error?.response?.data?.message) {
         const messages = error.response.data.message;
         const formattedErrors: { [key: string]: string } = {};
 
         messages.forEach((msg: string) => {
-          if (msg.includes('nombre')) formattedErrors.userName = msg;
-          else if (msg.includes('apellido')) formattedErrors.userLastName = msg;
-          else if (msg.includes('nickname')) formattedErrors.userNickName = msg;
-          else if (msg.includes('correo')) formattedErrors.userEmail = msg;
-          else if (msg.includes('contraseña')) formattedErrors.userPassword = msg;
+          if (msg.includes("nombre")) formattedErrors.userName = msg;
+          else if (msg.includes("apellido")) formattedErrors.userLastName = msg;
+          else if (msg.includes("nickname")) formattedErrors.userNickName = msg;
+          else if (msg.includes("correo")) formattedErrors.userEmail = msg;
+          else if (msg.includes("contraseña"))
+            formattedErrors.userPassword = msg;
         });
 
         setErrors(formattedErrors);
       } else {
-        console.log('Error', 'No se pudo registrar el usuario');
+        console.log("Error", "No se pudo registrar el usuario");
       }
     } finally {
       setIsLoading(false);
@@ -78,13 +79,13 @@ export default function RegisterScreen() {
 
   return (
     <KeyboardAvoidingView
-    style={{ flex: 1 }}
-    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
     >
       <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
         <Image
-          source={require('../../assets/images/logo3.png')}
+          source={require("../../assets/images/logo3.png")}
           style={theme.logoSecundario}
           resizeMode="contain"
         />
@@ -92,10 +93,18 @@ export default function RegisterScreen() {
         <Text style={theme.title}>Registro</Text>
 
         {[
-          { name: 'userName', label: 'Nombre', keyboardType: 'default' },
-          { name: 'userLastName', label: 'Apellido', keyboardType: 'default' },
-          { name: 'userNickName', label: 'Nombre de Usuario', keyboardType: 'default' },
-          { name: 'userEmail', label: 'Correo Electrónico', keyboardType: 'email-address' },
+          { name: "userName", label: "Nombre", keyboardType: "default" },
+          { name: "userLastName", label: "Apellido", keyboardType: "default" },
+          {
+            name: "userNickName",
+            label: "Nombre de Usuario",
+            keyboardType: "default",
+          },
+          {
+            name: "userEmail",
+            label: "Correo Electrónico",
+            keyboardType: "email-address",
+          },
         ].map(({ name, label, keyboardType }) => (
           <View key={name} style={theme.fieldContainer}>
             <Text style={theme.label}>{label}</Text>
@@ -103,9 +112,11 @@ export default function RegisterScreen() {
               style={theme.input}
               keyboardType={keyboardType as any}
               value={(formData as any)[name]}
-              onChangeText={text => handleChange(name, text)}
+              onChangeText={(text) => handleChange(name, text)}
             />
-            {errors[name] && <Text style={theme.errorText}>{errors[name]}</Text>}
+            {errors[name] && (
+              <Text style={theme.errorText}>{errors[name]}</Text>
+            )}
           </View>
         ))}
 
@@ -117,20 +128,22 @@ export default function RegisterScreen() {
               placeholder="Contraseña"
               secureTextEntry={!showPassword}
               value={formData.userPassword}
-              onChangeText={text => handleChange('userPassword', text)}
+              onChangeText={(text) => handleChange("userPassword", text)}
             />
-            <TouchableOpacity 
+            <TouchableOpacity
               style={theme.iconButton}
               onPress={() => setShowPassword(!showPassword)}
             >
-              <MaterialIcons 
-                name={showPassword ? 'visibility-off' : 'visibility'} 
-                size={24} 
-                color="#666" 
+              <MaterialIcons
+                name={showPassword ? "visibility-off" : "visibility"}
+                size={24}
+                color="#666"
               />
             </TouchableOpacity>
           </View>
-          {errors.userPassword && <Text style={theme.errorText}>{errors.userPassword}</Text>}
+          {errors.userPassword && (
+            <Text style={theme.errorText}>{errors.userPassword}</Text>
+          )}
         </View>
 
         <View style={theme.fieldContainer}>
@@ -141,24 +154,30 @@ export default function RegisterScreen() {
               placeholder="Confirmar Contraseña"
               secureTextEntry={!showPassword}
               value={formData.confirmPassword}
-              onChangeText={text => handleChange('confirmPassword', text)}
+              onChangeText={(text) => handleChange("confirmPassword", text)}
             />
-            <TouchableOpacity 
+            <TouchableOpacity
               style={theme.iconButton}
               onPress={() => setShowPassword(!showPassword)}
             >
-              <MaterialIcons 
-                name={showPassword ? 'visibility-off' : 'visibility'} 
-                size={24} 
-                color="#666" 
+              <MaterialIcons
+                name={showPassword ? "visibility-off" : "visibility"}
+                size={24}
+                color="#666"
               />
             </TouchableOpacity>
           </View>
-          {errors.confirmPassword && <Text style={theme.errorText}>{errors.confirmPassword}</Text>}
+          {errors.confirmPassword && (
+            <Text style={theme.errorText}>{errors.confirmPassword}</Text>
+          )}
         </View>
 
         {isLoading ? (
-          <ActivityIndicator size="large" color={colors.primary} style={theme.loader} />
+          <ActivityIndicator
+            size="large"
+            color={colors.primary}
+            style={theme.loader}
+          />
         ) : (
           <TouchableOpacity style={theme.button} onPress={handleRegister}>
             <Text style={theme.buttonText}>Registrarse</Text>
@@ -168,15 +187,3 @@ export default function RegisterScreen() {
     </KeyboardAvoidingView>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-

@@ -11,10 +11,9 @@ import {
 import axios from "axios";
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
-import { theme } from "../../constants/theme"; 
+import { theme } from "../../constants/theme";
 import { validateEmail } from "../../utils/validators";
-import { KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
-
+import { KeyboardAvoidingView, ScrollView, Platform } from "react-native";
 
 const BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
 const API_URL = `${BASE_URL}/user`;
@@ -50,8 +49,8 @@ export default function VerifyEmail() {
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
     >
       <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 20 }}>
         <View style={theme.container}>
@@ -63,9 +62,10 @@ export default function VerifyEmail() {
           <Text style={theme.appNameS}>Lumitech</Text>
           <Text style={theme.title}>Verificar Correo</Text>
           <Text style={theme.label}>
-            Ingresa tu correo electrónico para reenviar el correo de verificación
+            Ingresa tu correo electrónico para reenviar el correo de
+            verificación
           </Text>
-  
+
           <View style={theme.fieldContainer}>
             <TextInput
               style={theme.input}
@@ -77,12 +77,20 @@ export default function VerifyEmail() {
               autoCorrect={false}
             />
           </View>
-  
+
           {loading ? (
-            <ActivityIndicator style={theme.loader} size="large" color="#007AFF" />
+            <ActivityIndicator
+              style={theme.loader}
+              size="large"
+              color="#007AFF"
+            />
           ) : (
             <View style={theme.buttonContainer}>
-              <Pressable style={theme.button} onPress={handleResendVerification} disabled={!email}>
+              <Pressable
+                style={theme.button}
+                onPress={handleResendVerification}
+                disabled={!email}
+              >
                 <Text style={theme.buttonText}>Enviar verificación</Text>
               </Pressable>
             </View>
@@ -91,5 +99,4 @@ export default function VerifyEmail() {
       </ScrollView>
     </KeyboardAvoidingView>
   );
-  
 }

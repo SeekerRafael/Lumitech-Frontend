@@ -10,8 +10,8 @@ import {
 import { useRouter, useLocalSearchParams } from "expo-router";
 import axios from "axios";
 import Constants from "expo-constants";
-import { theme } from "../../constants/theme"; 
-import { KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
+import { theme } from "../../constants/theme";
+import { KeyboardAvoidingView, ScrollView, Platform } from "react-native";
 
 const BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
 const API_URL = `${BASE_URL}/user`;
@@ -60,8 +60,8 @@ export default function ResetPasswordScreen() {
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
     >
       <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 20 }}>
         <View style={theme.container}>
@@ -73,7 +73,7 @@ export default function ResetPasswordScreen() {
           <Text style={theme.appNameS}>Lumitech</Text>
           <Text style={theme.title}>Restablecer Contraseña</Text>
           <Text style={theme.label}>Código enviado a: {userEmail}</Text>
-  
+
           <View style={theme.fieldContainer}>
             <Text style={theme.label}>Código de verificación:</Text>
             <TextInput
@@ -84,7 +84,7 @@ export default function ResetPasswordScreen() {
               autoCapitalize="none"
             />
           </View>
-  
+
           <View style={theme.fieldContainer}>
             <Text style={theme.label}>Nueva contraseña:</Text>
             <TextInput
@@ -95,7 +95,7 @@ export default function ResetPasswordScreen() {
               onChangeText={setNewPassword}
             />
           </View>
-  
+
           <View style={theme.fieldContainer}>
             <Text style={theme.label}>Confirmar contraseña:</Text>
             <TextInput
@@ -106,9 +106,13 @@ export default function ResetPasswordScreen() {
               onChangeText={setConfirmPassword}
             />
           </View>
-  
+
           {loading ? (
-            <ActivityIndicator style={theme.loader} size="large" color="#007AFF" />
+            <ActivityIndicator
+              style={theme.loader}
+              size="large"
+              color="#007AFF"
+            />
           ) : (
             <View style={theme.buttonContainer}>
               <View style={theme.button}>
@@ -122,12 +126,4 @@ export default function ResetPasswordScreen() {
       </ScrollView>
     </KeyboardAvoidingView>
   );
-  
 }
-
-
-
-
-
-
-

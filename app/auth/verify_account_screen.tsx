@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,55 +7,56 @@ import {
   ActivityIndicator,
   Modal,
   Pressable,
-  Image
-} from 'react-native';
-import axios from 'axios';
-import Constants from 'expo-constants';
-import { useRouter } from 'expo-router';
-import { theme, colors } from '../../constants/theme'; 
-import { validateEmail, validateToken } from '@/utils/validators';
-import { KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
-
+  Image,
+} from "react-native";
+import axios from "axios";
+import Constants from "expo-constants";
+import { useRouter } from "expo-router";
+import { theme, colors } from "../../constants/theme";
+import { validateEmail, validateToken } from "@/utils/validators";
+import { KeyboardAvoidingView, ScrollView, Platform } from "react-native";
 
 const BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
 const API_URL = `${BASE_URL}/user`;
 
 export default function VerifyAccountScreen() {
   const router = useRouter();
-  const [token, setToken] = useState('');
+  const [token, setToken] = useState("");
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [resendEmail, setResendEmail] = useState('');
+  const [resendEmail, setResendEmail] = useState("");
 
   const handleVerify = async () => {
     const { token: tokenError } = validateToken(token);
     if (tokenError) {
-      Alert.alert('Error', tokenError);
+      Alert.alert("Error", tokenError);
       return;
     }
 
     setLoading(true);
     try {
       const response = await axios.post(`${API_URL}/verify-email`, { token });
-      Alert.alert('Éxito', response.data.message || 'Email verificado correctamente', [
-        { text: 'OK', onPress: () => router.replace('/auth/login_screen') },
-      ]);
+      Alert.alert(
+        "Éxito",
+        response.data.message || "Email verificado correctamente",
+        [{ text: "OK", onPress: () => router.replace("/auth/login_screen") }]
+      );
     } catch (error: any) {
-      let errorMessage = 'Error al verificar el token';
+      let errorMessage = "Error al verificar el token";
 
       if (error.response) {
         const { status, data } = error.response;
 
         if (status === 400 || status === 422) {
           errorMessage = Array.isArray(data.message)
-            ? data.message.join('\n')
-            : data.message || 'Token inválido o expirado';
+            ? data.message.join("\n")
+            : data.message || "Token inválido o expirado";
         } else if (status === 404) {
-          errorMessage = 'Usuario no encontrado';
+          errorMessage = "Usuario no encontrado";
         }
       }
 
-      Alert.alert('Error', errorMessage);
+      Alert.alert("Error", errorMessage);
     } finally {
       setLoading(false);
     }
@@ -64,26 +65,28 @@ export default function VerifyAccountScreen() {
   const handleResendToken = async () => {
     const { email: emailError } = validateEmail(resendEmail);
     if (emailError) {
-      Alert.alert('Error', emailError);
+      Alert.alert("Error", emailError);
       return;
     }
 
     setLoading(true);
     try {
-      await axios.post(`${API_URL}/resend-verification`, { email: resendEmail });
-      Alert.alert('Éxito', 'Token reenviado, revisa tu email');
+      await axios.post(`${API_URL}/resend-verification`, {
+        email: resendEmail,
+      });
+      Alert.alert("Éxito", "Token reenviado, revisa tu email");
       setModalVisible(false);
-      setResendEmail('');
+      setResendEmail("");
     } catch (error: any) {
-      let errorMessage = 'No se pudo reenviar el token';
+      let errorMessage = "No se pudo reenviar el token";
 
       if (error.response?.data?.message) {
         errorMessage = Array.isArray(error.response.data.message)
-          ? error.response.data.message.join('\n')
+          ? error.response.data.message.join("\n")
           : error.response.data.message;
       }
 
-      Alert.alert('Error', errorMessage);
+      Alert.alert("Error", errorMessage);
     } finally {
       setLoading(false);
     }
@@ -92,8 +95,8 @@ export default function VerifyAccountScreen() {
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
     >
       <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 20 }}>
         <View style={theme.container}>
@@ -107,7 +110,7 @@ export default function VerifyAccountScreen() {
           <Text style={theme.label}>
             Ingresa el token de verificación que recibiste en tu email
           </Text>
-  
+
           <View style={theme.fieldContainer}>
             <TextInput
               style={theme.input}
@@ -117,31 +120,33 @@ export default function VerifyAccountScreen() {
               autoCapitalize="none"
             />
           </View>
-  
+
           {loading ? (
-            <ActivityIndicator style={theme.loader} size="large" color="#007AFF" />
+            <ActivityIndicator
+              style={theme.loader}
+              size="large"
+              color="#007AFF"
+            />
           ) : (
             <View style={theme.buttonContainer}>
-              <Pressable style={theme.button} onPress={handleVerify} disabled={!token}>
+              <Pressable
+                style={theme.button}
+                onPress={handleVerify}
+                disabled={!token}
+              >
                 <Text style={theme.buttonText}>Verificar cuenta</Text>
               </Pressable>
-              <View style={{ marginTop: 20, alignItems: 'center' }}>
-                <Text style={theme.labelText}>
-                  ¿No recibiste el token?
-                </Text>
+              <View style={{ marginTop: 20, alignItems: "center" }}>
+                <Text style={theme.labelText}>¿No recibiste el token?</Text>
                 <Pressable onPress={() => setModalVisible(true)}>
-                  <Text style={theme.labelText}>
-                    Reenviar token
-                  </Text>
+                  <Text style={theme.labelText}>Reenviar token</Text>
                 </Pressable>
               </View>
             </View>
           )}
         </View>
-  
       </ScrollView>
-  
-   
+
       <Modal
         visible={modalVisible}
         transparent
@@ -160,7 +165,10 @@ export default function VerifyAccountScreen() {
               onChangeText={setResendEmail}
             />
             <View style={theme.modalButtons}>
-              <Pressable style={theme.cancelButton} onPress={() => setModalVisible(false)}>
+              <Pressable
+                style={theme.cancelButton}
+                onPress={() => setModalVisible(false)}
+              >
                 <Text style={theme.cancelText}>Cancelar</Text>
               </Pressable>
               <Pressable style={theme.sendButton} onPress={handleResendToken}>
@@ -172,9 +180,4 @@ export default function VerifyAccountScreen() {
       </Modal>
     </KeyboardAvoidingView>
   );
-  
 }
-
-
-
-
