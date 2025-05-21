@@ -12,7 +12,7 @@ export const AuthService = {
       password,
     });
 
-    await StorageService.setItem("userToken", response.data.token);
+    await StorageService.setItem("userToken", response.data.access_token);
     await StorageService.setItem(
       "userData",
       JSON.stringify(response.data.user)
@@ -21,13 +21,29 @@ export const AuthService = {
     return response.data;
   },
 
+  async refreshToken() {
+    const response = await axios.post(
+      `${API_URL}/auth/refresh`,
+      {},
+      {
+        withCredentials: true,
+      }
+    );
+
+    await StorageService.setItem("userToken", response.data.access_token);
+
+    return response.data.access_token;
+  },
+
   async getCurrentUser() {
     const userData = await StorageService.getItem("userData");
+    console.log("DEBUG: userData from storage:", userData);
     return userData ? JSON.parse(userData) : null;
   },
 
   async getUserProfile() {
     const token = await StorageService.getItem("userToken");
+    console.log("DEBUG: token for getUserProfile:", token);
 
     if (!token) {
       throw new Error("No token found");
@@ -39,6 +55,7 @@ export const AuthService = {
       },
     });
 
+    console.log("DEBUG: user profile from API:", response.data.user);
     return response.data.user;
   },
 

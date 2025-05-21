@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   Platform,
+  Pressable,
 } from "react-native";
 import { useRouter } from "expo-router";
 import axios from "axios";
@@ -89,14 +90,18 @@ export default function ForgotPasswordScreen() {
               color="#007AFF"
             />
           ) : (
-            <View style={theme.buttonContainer}>
-              <View style={theme.button}>
-                <Text style={theme.buttonText} onPress={handleSubmit}>
-                  Enviar Código
-                </Text>
-              </View>
-            </View>
+            <Pressable style={theme.button} onPress={handleSubmit}>
+              <Text style={theme.buttonText}>Enviar Código</Text>
+            </Pressable>
           )}
+
+          <Pressable onPress={() => router.push("/auth/login_screen")}>
+            <Text
+              style={{ marginTop: 20, color: "#007AFF", textAlign: "center" }}
+            >
+              Atras
+            </Text>
+          </Pressable>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

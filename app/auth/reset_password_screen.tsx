@@ -6,12 +6,15 @@ import {
   Alert,
   ActivityIndicator,
   Image,
+  TouchableOpacity,
+  Pressable,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import axios from "axios";
 import Constants from "expo-constants";
 import { theme } from "../../constants/theme";
 import { KeyboardAvoidingView, ScrollView, Platform } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons"; // Importar íconos
 
 const BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
 const API_URL = `${BASE_URL}/user`;
@@ -23,6 +26,8 @@ export default function ResetPasswordScreen() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const userEmail = params.userEmail as string;
 
@@ -87,24 +92,52 @@ export default function ResetPasswordScreen() {
 
           <View style={theme.fieldContainer}>
             <Text style={theme.label}>Nueva contraseña:</Text>
-            <TextInput
-              style={theme.input}
-              placeholder="Nueva contraseña"
-              secureTextEntry
-              value={newPassword}
-              onChangeText={setNewPassword}
-            />
+            <View
+              style={[
+                theme.passwordContainer,
+                { flexDirection: "row", alignItems: "center" },
+              ]}
+            >
+              <TextInput
+                style={[theme.input, { flex: 1 }]}
+                placeholder="Nueva contraseña"
+                secureTextEntry={!showPassword}
+                value={newPassword}
+                onChangeText={setNewPassword}
+              />
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                <MaterialIcons
+                  name={showPassword ? "visibility-off" : "visibility"}
+                  size={24}
+                  color="#666"
+                />
+              </TouchableOpacity>
+            </View>
           </View>
 
           <View style={theme.fieldContainer}>
             <Text style={theme.label}>Confirmar contraseña:</Text>
-            <TextInput
-              style={theme.input}
-              placeholder="Repite la contraseña"
-              secureTextEntry
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-            />
+            <View
+              style={[
+                theme.passwordContainer,
+                { flexDirection: "row", alignItems: "center" },
+              ]}
+            >
+              <TextInput
+                style={[theme.input, { flex: 1 }]}
+                placeholder="Repite la contraseña"
+                secureTextEntry={!showPassword}
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+              />
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                <MaterialIcons
+                  name={showPassword ? "visibility-off" : "visibility"}
+                  size={24}
+                  color="#666"
+                />
+              </TouchableOpacity>
+            </View>
           </View>
 
           {loading ? (
@@ -122,6 +155,13 @@ export default function ResetPasswordScreen() {
               </View>
             </View>
           )}
+          <Pressable onPress={() => router.push("./verify_email")}>
+            <Text
+              style={{ marginTop: 20, color: "#007AFF", textAlign: "center" }}
+            >
+              Atras
+            </Text>
+          </Pressable>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

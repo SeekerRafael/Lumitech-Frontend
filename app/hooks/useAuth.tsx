@@ -9,19 +9,33 @@ export function useAuth() {
 
   const loadUser = useCallback(async () => {
     try {
-      const token = await StorageService.getItem("userToken");
+      let token = await StorageService.getItem("userToken");
 
       if (!token) {
         setUser(null);
         return;
       }
 
-      const fullProfile = await AuthService.getUserProfile();
-      console.log("Perfil completo cargado:", fullProfile);
-      setUser(fullProfile);
+      try {
+        const fullProfile = await AuthService.getUserProfile();
+        setUser(fullProfile);
+      } catch (error: any) {
+        if (error.response?.status === 401) {
+          try {
+            token = await AuthService.refreshToken();
+
+            const fullProfile = await AuthService.getUserProfile();
+            setUser(fullProfile);
+          } catch (refreshError) {
+            await AuthService.logout();
+            setUser(null);
+          }
+        } else {
+          throw error;
+        }
+      }
     } catch (error) {
       console.error("Error al cargar perfil:", error);
-
       const fallbackUser = await AuthService.getCurrentUser();
       setUser(fallbackUser);
     } finally {

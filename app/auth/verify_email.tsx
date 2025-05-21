@@ -95,6 +95,13 @@ export default function VerifyEmail() {
               </Pressable>
             </View>
           )}
+          <Pressable onPress={() => router.push("./login_screen")}>
+            <Text
+              style={{ marginTop: 20, color: "#007AFF", textAlign: "center" }}
+            >
+              Atras
+            </Text>
+          </Pressable>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

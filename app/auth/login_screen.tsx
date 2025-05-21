@@ -36,9 +36,12 @@ export default function LoginScreen() {
     setIsLoggingIn(true);
 
     try {
+
       await login(identifier, password, isEmail);
+
       router.replace("/(tabs)/home_screen");
     } catch (error: any) {
+
       let message = "Error al iniciar sesión";
       if (error.response) {
         switch (error.response.status) {

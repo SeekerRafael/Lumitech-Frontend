@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  BackHandler,
 } from "react-native";
 import { registerUser } from "../../services/api";
 import { useRouter } from "expo-router";
@@ -75,6 +76,47 @@ export default function RegisterScreen() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  useEffect(() => {
+    const handleBackPress = () => {
+      Alert.alert(
+        "¿Estás seguro?",
+        "Si regresas, toda la información del registro se perderá.",
+        [
+          { text: "Cancelar", style: "cancel" },
+          {
+            text: "Sí, regresar",
+            style: "destructive",
+            onPress: () => router.replace("./login_screen"),
+          },
+        ]
+      );
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      handleBackPress
+    );
+
+    return () => backHandler.remove();
+  }, []);
+
+  // Función para confirmar regreso al login
+  const confirmGoBack = () => {
+    Alert.alert(
+      "¿Estás seguro?",
+      "Si regresas, toda la información del registro se perderá.",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Sí, regresar",
+          style: "destructive",
+          onPress: () => router.replace("./login_screen"),
+        },
+      ]
+    );
   };
 
   return (
@@ -179,9 +221,18 @@ export default function RegisterScreen() {
             style={theme.loader}
           />
         ) : (
-          <TouchableOpacity style={theme.button} onPress={handleRegister}>
-            <Text style={theme.buttonText}>Registrarse</Text>
-          </TouchableOpacity>
+          <>
+            <TouchableOpacity style={theme.button} onPress={handleRegister}>
+              <Text style={theme.buttonText}>Registrarse</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={{ marginTop: 20, alignItems: "center" }}
+              onPress={confirmGoBack}
+            >
+              <Text style={{ color: colors.primary, fontSize: 16 }}>Atrás</Text>
+            </TouchableOpacity>
+          </>
         )}
       </ScrollView>
     </KeyboardAvoidingView>
