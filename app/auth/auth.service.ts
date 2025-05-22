@@ -11,12 +11,18 @@ export const AuthService = {
       [isEmail ? "email" : "nickName"]: identifier,
       password,
     });
+    
+    const access_token = response.data.access_token || response.data.token;
 
-    await StorageService.setItem("userToken", response.data.access_token);
-    await StorageService.setItem(
-      "userData",
-      JSON.stringify(response.data.user)
-    );
+if (!access_token) {
+  console.error("❌ No se recibió access_token ni token del backend:", response.data);
+  throw new Error("Access token no recibido");
+}
+
+await StorageService.setItem("userToken", access_token);
+
+    await StorageService.setItem("userData", JSON.stringify(response.data.user));
+    
 
     return response.data;
   },
