@@ -12,3 +12,12 @@ export const registerUser = (data: {
 }) => {
   return axios.post(`${BASE_URL}/user/register`, data);
 };
+
+
+
+
+
+
+
+
+

@@ -1,16 +1,17 @@
-import React from "react";
-import { Stack } from "expo-router";
-import { useAuth } from "../hooks/useAuth";
-import { ActivityIndicator, View } from "react-native";
+// app/(auth)/_layout.tsx
 import { useRouter } from "expo-router";
+import { useAuth } from "../hooks/useAuth";
+import { useEffect } from "react";
+import { Stack } from "expo-router";
+import { View, ActivityIndicator } from "react-native";
 
-export default function ProtectedLayout() {
+export default function AuthLayout() {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
 
-  React.useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.replace("/auth/login_screen");
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.replace("/(tabs)/home_screen");
     }
   }, [isLoading, isAuthenticated]);
 
@@ -24,9 +25,3 @@ export default function ProtectedLayout() {
 
   return <Stack screenOptions={{ headerShown: false }} />;
 }
-
-
-
-
-
-

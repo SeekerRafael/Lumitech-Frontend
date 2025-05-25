@@ -1,10 +1,15 @@
-import { Stack } from "expo-router";
+// app/_layout.tsx
+
+import { Slot } from "expo-router";
 import { Provider as PaperProvider } from "react-native-paper";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 export default function RootLayout() {
   return (
-    <PaperProvider>
-      <Stack screenOptions={{ headerShown: false }} />
-    </PaperProvider>
+    <SafeAreaProvider>
+      <PaperProvider>
+        <Slot />
+      </PaperProvider>
+    </SafeAreaProvider>
   );
 }

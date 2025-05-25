@@ -5,90 +5,207 @@ import Constants from "expo-constants";
 const BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
 const API_URL = `${BASE_URL}/user`;
 
+// Configuración global de axios para manejar cookies
+axios.defaults.withCredentials = true;
+
 export const AuthService = {
   async login(identifier: string, password: string, isEmail: boolean) {
-    const response = await axios.post(`${API_URL}/auth/login`, {
-      [isEmail ? "email" : "nickName"]: identifier,
-      password,
-    });
+    // Verificar si ya hay un token válido
+    const existingToken = await StorageService.getItem("userToken");
     
-    const access_token = response.data.access_token || response.data.token;
+    if (existingToken) {
+      try {
+        // Verificar si el token existente aún es válido
+        const existingUser = await this.getUserProfile();
+        return { token: existingToken, user: existingUser };
+      } catch (error) {
+        console.warn("Token existente no válido, procediendo con nuevo login", error);
+        await this.logout(); // Limpiar datos inválidos
+      }
+    }
 
-if (!access_token) {
-  console.error("❌ No se recibió access_token ni token del backend:", response.data);
-  throw new Error("Access token no recibido");
-}
+    try {
+      const response = await axios.post(`${API_URL}/auth/login`, {
+        [isEmail ? "email" : "nickName"]: identifier,
+        password,
+      });
 
-await StorageService.setItem("userToken", access_token);
+      const access_token = response.data.access_token;
+      if (!access_token) {
+        console.error("Error: No se recibió access_token del backend", response.data);
+        throw new Error("Access token no recibido");
+      }
 
-    await StorageService.setItem("userData", JSON.stringify(response.data.user));
-    
+      // Almacenar tokens y datos de usuario
+      await StorageService.setItem("userToken", access_token);
+      
+      if (response.data.user) {
+        await StorageService.setItem("userData", JSON.stringify(response.data.user));
+      }
 
-    return response.data;
+      return {
+        token: access_token,
+        user: response.data.user,
+        refresh_token: response.data.refresh_token // Por si necesitas referencia
+      };
+    } catch (error) {
+      console.error("Error en login:", error);
+      throw error;
+    }
   },
 
   async refreshToken() {
-    const response = await axios.post(
-      `${API_URL}/auth/refresh`,
-      {},
-      {
-        withCredentials: true,
+    try {
+      const response = await axios.post(
+        `${API_URL}/auth/refresh`,
+        {}, // Body vacío
+        {
+          withCredentials: true, // Importante para enviar cookies
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        }
+      );
+
+      if (!response.data.access_token) {
+        throw new Error("No se recibió nuevo access token");
       }
-    );
 
-    await StorageService.setItem("userToken", response.data.access_token);
+      // Actualizar el token en el almacenamiento
+      await StorageService.setItem("userToken", response.data.access_token);
 
-    return response.data.access_token;
+      // Si el backend devuelve datos de usuario actualizados
+      if (response.data.user) {
+        await StorageService.setItem("userData", JSON.stringify(response.data.user));
+      }
+
+      return response.data.access_token;
+    } catch (error) {
+      console.error("Error al refrescar token:", error);
+      
+      // Si el error es 401 (no autorizado), hacer logout
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        console.warn("Refresh token inválido, cerrando sesión...");
+        await this.logout();
+      }
+      
+      throw error;
+    }
   },
 
   async getCurrentUser() {
-    const userData = await StorageService.getItem("userData");
-    console.log("DEBUG: userData from storage:", userData);
-    return userData ? JSON.parse(userData) : null;
+    try {
+      const userData = await StorageService.getItem("userData");
+      if (!userData) return null;
+      
+      return JSON.parse(userData);
+    } catch (error) {
+      console.error("Error al obtener usuario actual:", error);
+      return null;
+    }
   },
 
   async getUserProfile() {
-    const token = await StorageService.getItem("userToken");
-    console.log("DEBUG: token for getUserProfile:", token);
+    try {
+      const token = await StorageService.getItem("userToken");
+      if (!token) throw new Error("No se encontró token de autenticación");
 
-    if (!token) {
-      throw new Error("No token found");
-    }
-
-    const response = await axios.get(`${API_URL}/profile`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    console.log("DEBUG: user profile from API:", response.data.user);
-    return response.data.user;
-  },
-
-  async changePassword(currentPassword: string, newPassword: string) {
-    const token = await StorageService.getItem("userToken");
-
-    if (!token) {
-      throw new Error("No token found");
-    }
-
-    const response = await axios.patch(
-      `${API_URL}/change-password`,
-      {
-        currentPassword,
-        userNewPassword: newPassword,
-      },
-      {
+      const response = await axios.get(`${API_URL}/profile`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }
-    );
+      });
 
-    return response.data;
+      // Actualizar datos de usuario si es necesario
+      if (response.data.user) {
+        await StorageService.setItem("userData", JSON.stringify(response.data.user));
+      }
+
+      return response.data.user;
+    } catch (error) {
+      console.error("Error al obtener perfil de usuario:", error);
+      
+      // Si el error es 401, intentar refrescar el token
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        console.log("Token expirado, intentando refrescar...");
+        try {
+          const newToken = await this.refreshToken();
+          // Reintentar la solicitud con el nuevo token
+          const retryResponse = await axios.get(`${API_URL}/profile`, {
+            headers: {
+              Authorization: `Bearer ${newToken}`,
+            },
+          });
+          return retryResponse.data.user;
+        } catch (refreshError) {
+          console.error("Error al refrescar token:", refreshError);
+          throw refreshError;
+        }
+      }
+      
+      throw error;
+    }
+  },
+
+  async changePassword(currentPassword: string, newPassword: string) {
+    try {
+      const token = await StorageService.getItem("userToken");
+      if (!token) throw new Error("No se encontró token de autenticación");
+
+      const response = await axios.patch(
+        `${API_URL}/change-password`,
+        {
+          currentPassword,
+          userNewPassword: newPassword,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error("Error al cambiar contraseña:", error);
+      throw error;
+    }
   },
 
   async logout() {
-    await StorageService.clearAuthData();
-  },
+    try {
+      // Intentar cerrar sesión en el backend
+      await axios.post(
+        `${API_URL}/auth/logout`,
+        {},
+        {
+          withCredentials: true,
+        }
+      );
+    } catch (error) {
+      console.warn("Error al cerrar sesión en el backend:", error);
+      // Continuar con el logout local aunque falle el del backend
+    } finally {
+      // Limpiar datos de autenticación localmente
+      try {
+        await StorageService.clearAuthData();
+      } catch (storageError) {
+        console.error("Error al limpiar almacenamiento:", storageError);
+      }
+    }
+  }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
