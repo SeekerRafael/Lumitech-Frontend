@@ -173,28 +173,37 @@ export const AuthService = {
   },
 
   async logout() {
-    try {
-      // Intentar cerrar sesión en el backend
-      await axios.post(
-        `${API_URL}/auth/logout`,
-        {},
-        {
-          withCredentials: true,
-        }
-      );
-    } catch (error) {
-      console.warn("Error al cerrar sesión en el backend:", error);
-      // Continuar con el logout local aunque falle el del backend
-    } finally {
-      // Limpiar datos de autenticación localmente
-      try {
-        await StorageService.clearAuthData();
-      } catch (storageError) {
-        console.error("Error al limpiar almacenamiento:", storageError);
+  try {
+    // 1. Obtener el token actual para incluirlo en los headers
+    const token = await StorageService.getItem("userToken");
+    
+    // 2. Hacer la petición de logout con el token en los headers
+    await axios.post(
+      `${API_URL}/logout`, // Ruta actualizada
+      {},
+      {
+        withCredentials: true,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
+    );
+  } catch (error) {
+    console.warn("Error al cerrar sesión en el backend:", error);
+    // No relanzamos el error para continuar con el logout local
+  } finally {
+    // 3. Limpieza local garantizada
+    try {
+      await StorageService.clearAuthData();
+      // Limpiar también la caché de axios por si acaso
+      delete axios.defaults.headers.common['Authorization'];
+    } catch (storageError) {
+      console.error("Error al limpiar almacenamiento:", storageError);
     }
   }
+}
 };
+
 
 
 
