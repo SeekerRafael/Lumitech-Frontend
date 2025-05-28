@@ -1,19 +1,18 @@
-import React, { useState, useCallback } from "react";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback, useState } from "react";
 import {
-  View,
-  Text,
   ActivityIndicator,
-  Image,
-  TouchableOpacity,
   BackHandler,
+  Image,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { useAuth } from "../hooks/useAuth";
-import { useRouter, useFocusEffect } from "expo-router";
+import { Button, Dialog, Menu, Paragraph, Portal } from "react-native-paper";
+import { colors, theme } from "../../constants/theme";
 import { AuthService } from "../auth/auth.service";
-import { MaterialIcons } from "@expo/vector-icons";
-import { theme, colors } from "../../constants/theme";
-import { Menu, Portal, Dialog, Paragraph, Button } from "react-native-paper";
-import { Ionicons } from "@expo/vector-icons";
+import { useAuth } from "../hooks/useAuth";
 
 const HomeScreen = () => {
   const { user, isLoading, refreshUser } = useAuth();

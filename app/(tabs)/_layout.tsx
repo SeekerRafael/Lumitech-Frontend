@@ -1,8 +1,7 @@
+import { Stack, useRouter } from "expo-router";
 import React from "react";
-import { Stack } from "expo-router";
-import { useAuth } from "../hooks/useAuth";
 import { ActivityIndicator, View } from "react-native";
-import { useRouter } from "expo-router";
+import { useAuth } from "../hooks/useAuth";
 
 export default function ProtectedLayout() {
   const { isAuthenticated, isLoading } = useAuth();

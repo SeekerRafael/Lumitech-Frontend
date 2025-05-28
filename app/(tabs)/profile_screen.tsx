@@ -1,9 +1,9 @@
+import { useFocusEffect, useRouter } from "expo-router";
 import React from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
+import { Image, Text, View } from "react-native";
 import { IconButton } from "react-native-paper";
+import { theme } from "../../constants/theme";
 import { useAuth } from "../hooks/useAuth";
-import { useRouter, useFocusEffect } from "expo-router";
-import { theme, colors } from "../../constants/theme";
 const ProfileScreen = () => {
   const { user, refreshUser } = useAuth();
   const router = useRouter();

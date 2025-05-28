@@ -49,7 +49,7 @@ const TutorialScreen = () => {
 
       <TouchableOpacity
         style={theme.input}
-        onPress={() => router.push("/(tabs)/home_screen")}
+        onPress={() => router.push("/(tabs)/register_roseta")}
       >
         <Text style={theme.buttonText}>¡Listo, empezar!</Text>
       </TouchableOpacity>
