@@ -1,29 +1,29 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  TouchableOpacity,
-  Alert,
-} from "react-native";
+import { View, Text, TextInput, Image, TouchableOpacity, Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Ionicons } from "@expo/vector-icons";
-import { colors } from "../../constants/theme";
+import Constants from "expo-constants";
+import { theme } from "../../constants/theme";
+
+const BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
 
 const EditRosetaScreen = () => {
   const { rosette_mac, currentUbication } = useLocalSearchParams();
-  const ubicationParam = Array.isArray(currentUbication)
-  ? currentUbication[0]
-  : currentUbication || "";
-
-const [ubication, setUbication] = useState(ubicationParam);
   const router = useRouter();
 
+  const ubicationParam = Array.isArray(currentUbication)
+    ? currentUbication[0]
+    : currentUbication || "";
+
+  const [ubication, setUbication] = useState(ubicationParam);
+  const [error, setError] = useState<string | null>(null);
+
   const handleUpdateUbication = async () => {
-    if (!ubication.trim()) {
-      Alert.alert("Error", "La ubicación no puede estar vacía.");
+    setError(null);
+
+    const trimmedUbication = ubication.trim();
+    if (!trimmedUbication) {
+      setError("La ubicación no puede estar vacía.");
       return;
     }
 
@@ -31,7 +31,7 @@ const [ubication, setUbication] = useState(ubicationParam);
       const token = await AsyncStorage.getItem("userToken");
 
       const response = await fetch(
-        `${process.env.API_BASE_URL || "http://192.168.0.10:3000"}/roseta/change-ubication`,
+        `${BASE_URL || "http://192.168.0.10:3000"}/roseta/change-ubication`,
         {
           method: "PATCH",
           headers: {
@@ -40,7 +40,7 @@ const [ubication, setUbication] = useState(ubicationParam);
           },
           body: JSON.stringify({
             rosette_mac,
-            ubication,
+            ubication: trimmedUbication,
           }),
         }
       );
@@ -54,83 +54,53 @@ const [ubication, setUbication] = useState(ubicationParam);
       Alert.alert("Éxito", data.msg, [
         {
           text: "OK",
-          onPress: () => router.back(), // vuelve al HomeScreen
+          onPress: () => router.back(),
         },
       ]);
-    } catch (error: any) {
-      Alert.alert("Error", error.message);
+    } catch (err: any) {
+      setError(err.message || "No se pudo actualizar");
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Editar Ubicación de la Roseta</Text>
+    <View style={theme.containerTerciario}>
+      <Image
+        source={require("../../assets/images/logo3.png")}
+        style={theme.logoTerciario}
+        resizeMode="contain"
+      />
+      <Text style={theme.title}>Editar Ubicación</Text>
 
-      <Text style={styles.label}>MAC:</Text>
-      <Text style={styles.value}>{rosette_mac}</Text>
+      <Text style={theme.label}>
+        MAC: <Text>{rosette_mac}</Text>
+      </Text>
 
-      <Text style={styles.label}>Nueva Ubicación:</Text>
+      <Text style={theme.label}>Nueva ubicación:</Text>
       <TextInput
-        style={styles.input}
+        style={[theme.input, error ? theme.errorText : undefined]}
         placeholder="Ej. Sala, Cocina, Habitación"
         value={ubication}
-        onChangeText={setUbication}
+        onChangeText={(text) => {
+          setUbication(text);
+          if (error) setError(null);
+        }}
       />
+      {error && <Text style={theme.errorText}>{error}</Text>}
 
-      <TouchableOpacity style={styles.button} onPress={handleUpdateUbication}>
-        <Ionicons name="save" size={20} color="white" style={{ marginRight: 6 }} />
-        <Text style={styles.buttonText}>Guardar</Text>
-      </TouchableOpacity>
+      <View style={theme.buttonsRow}>
+        <TouchableOpacity
+          style={theme.leftButton}
+          onPress={() => router.back()}
+        >
+          <Text style={theme.buttonTextS}>Cancelar</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={theme.rightButton} onPress={handleUpdateUbication}>
+          <Text style={theme.buttonTextS}>Guardar cambios</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
 
 export default EditRosetaScreen;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-    padding: 20,
-    justifyContent: "center",
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginBottom: 20,
-    color: colors.primary,
-    textAlign: "center",
-  },
-  label: {
-    fontSize: 16,
-    color: colors.colorLetter,
-    marginTop: 10,
-  },
-  value: {
-    fontSize: 16,
-    color: colors.primary,
-    marginBottom: 10,
-  },
-  input: {
-    borderColor: colors.primary,
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    marginTop: 8,
-    color: colors.colorLetter,
-  },
-  button: {
-    marginTop: 30,
-    backgroundColor: colors.primary,
-    padding: 12,
-    borderRadius: 10,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  buttonText: {
-    color: "white",
-    fontWeight: "bold",
-  },
-});

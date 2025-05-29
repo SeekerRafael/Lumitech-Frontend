@@ -10,6 +10,9 @@ export const colors = {
   error: "#FF4D4D",
   cardRow: "#E0F7FA",
   cardBackground: "#FFFFFF",
+  cardBorder: "#E0E0E0",
+  cardShadow: "rgba(0, 0, 0, 0.1)",
+  secondaryText: "#666666",
 };
 
 export const animation = StyleSheet.create({
@@ -206,7 +209,6 @@ export const theme = StyleSheet.create({
     width: "100%",
     alignItems: "center",
   },
-
   label: {
     width: "90%",
     fontSize: 14,
@@ -288,7 +290,6 @@ export const theme = StyleSheet.create({
     color: colors.colorLetter,
     textAlign: "center",
   },
-
   menuItem: {
     color: colors.colorLetter,
   },
@@ -400,13 +401,11 @@ export const theme = StyleSheet.create({
     marginBottom: 10,
     width: "90%",
   },
-
   rowLabelText: {
     fontSize: 14,
     color: colors.colorLetter,
     marginRight: 5,
   },
-
   containerTerciario: {
     flex: 1,
     backgroundColor: colors.background,
@@ -415,4 +414,79 @@ export const theme = StyleSheet.create({
     padding: 20,
     paddingTop: 40,
   },
+
+  // Nuevos estilos para las tarjetas de dispositivos
+  deviceCard: {
+    flex: 1,
+    backgroundColor: colors.cardBackground,
+    borderRadius: 12,
+    padding: 16,
+    margin: 8,
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
+    shadowColor: colors.cardShadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+    minWidth: 160, // Ancho mínimo para que no se vean demasiado pequeñas
+    maxWidth: '46%', // Para que quepan 2 por fila
+  },
+  deviceCardContent: {
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  deviceIcon: {
+    width: 48,
+    height: 48,
+    marginBottom: 12,
+    tintColor: colors.primary,
+  },
+  deviceName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.primary,
+    textAlign: 'center',
+  },
+  deviceActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    borderTopWidth: 1,
+    borderTopColor: colors.cardBorder,
+    paddingTop: 12,
+    marginTop: 12,
+  },
+  deviceGridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    paddingHorizontal: 8,
+  },
+  deviceStatus: {
+    fontSize: 12,
+    color: colors.secondaryText,
+    marginTop: 4,
+  },
+  deviceMac: {
+    fontSize: 10,
+    color: colors.secondaryText,
+    marginTop: 4,
+    textAlign: 'center',
+  },
+    buttonRegister: {
+    backgroundColor: colors.primary,
+    paddingVertical: 14,
+    borderRadius: 10,
+    marginTop: 20,
+    marginBottom: 10,
+    width: "90%",
+    alignItems: "center",
+    alignSelf: "center",
+  },
+  buttonRegisterText: {
+    color: colors.white,
+    fontSize: 15,
+    fontWeight: "bold",
+  },
+
 });

@@ -27,6 +27,11 @@ const HomeScreen = () => {
   const [devicesLoading, setDevicesLoading] = useState(false);
   const [devicesError, setDevicesError] = useState<string | null>(null);
 
+  // Estado para dialogo de eliminar roseta
+  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+  const [rosetaToDelete, setRosetaToDelete] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
   useFocusEffect(
     React.useCallback(() => {
       refreshUser();
@@ -70,6 +75,45 @@ const HomeScreen = () => {
       router.replace("/auth/login_screen");
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
+    }
+  };
+
+  const confirmDeleteRoseta = (mac: string) => {
+    setRosetaToDelete(mac);
+    setDeleteDialogVisible(true);
+  };
+
+  const handleDeleteRoseta = async () => {
+    if (!rosetaToDelete) return;
+    setDeleting(true);
+
+    try {
+      const token = await AsyncStorage.getItem("userToken");
+      if (!token) throw new Error("No se encontró token de autenticación");
+
+      const response = await fetch(
+        `${process.env.API_BASE_URL || "http://192.168.0.10:3000"}/roseta/remove-rosette/${rosetaToDelete}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.msg || "Error al eliminar la roseta");
+      }
+
+      // Opcional: mostrar mensaje exitoso o refrescar lista
+      await fetchDevices();
+      setDeleteDialogVisible(false);
+      setRosetaToDelete(null);
+    } catch (error: any) {
+      alert(error.message || "Error desconocido al eliminar la roseta");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -199,71 +243,123 @@ const HomeScreen = () => {
           <Text style={{ marginTop: 20 }}>No tienes dispositivos registrados.</Text>
         ) : (
           <FlatList
-            data={devices}
-            keyExtractor={(item) => item.rosette_mac}
-            style={{ marginTop: 20 }}
-            renderItem={({ item }) => {
-              const ubicacion = item.ubication;
+  data={devices}
+  keyExtractor={(item) => item.rosette_mac}
+  contentContainerStyle={{ paddingBottom: 20 }}
+  style={{ marginTop: 20 }}
+  renderItem={({ item }) => {
+    return (
+      <View
+        style={{
+          backgroundColor: "#03045E", // Azul principal (Tailwind blue-500)
+          marginBottom: 16,
+          paddingVertical: 14,
+          paddingHorizontal: 20,
+          borderRadius: 16,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+          elevation: 3,
+         width: 280, // ancho fijo de 350 píxeles
 
-              return (
-                <View
-                  style={{
-                    backgroundColor: colors.primary,
-                    marginBottom: 10,
-                    padding: 15,
-                    borderRadius: 12,
-                    shadowColor: "#000",
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.2,
-                    shadowRadius: 3,
-                    elevation: 3,
-                  }}
-                >
-                  <Text style={{ color: "white", fontWeight: "bold", fontSize: 16 }}>
-                    MAC: {item.rosette_mac}
-                  </Text>
-                  <Text style={{ color: "white", marginTop: 5 }}>
-                    IP: {item.rosette_ip}
-                  </Text>
-                  <Text style={{ color: "white", marginTop: 5 }}>
-                    WiFi: {item.wifi_ssid}
-                  </Text>
-                  <Text style={{ color: "white", marginTop: 5 }}>
-                    Ubicación: {item.ubication}
-                  </Text>
+          alignSelf: "center",
+          position: "relative",
+        }}
+      >
 
-                  {/* Botones de acción */}
-                  <View style={{ flexDirection: "row", marginTop: 10 }}>
-                    {/* Editar ubicación */}
-                    <IconButton
-                      icon="pencil"
-                      iconColor="white"
-                      size={24}
-                      onPress={() =>
-                        router.push({
-                          pathname: "/edit_roseta",
-                          params: {
-                            rosette_mac: item.rosette_mac,
-                            currentUbication: item.ubication || "",
-                          },
-                        })
-                      }
-                    />
-
-                    {/* Eliminar roseta */}
-                    <IconButton
-                      icon="delete"
-                      iconColor="white"
-                      size={24}
-                      onPress={() => {
-                        console.log("Eliminar roseta:", item.rosette_mac);
-                      }}
-                    />
-                  </View>
-                </View>
-              );
-            }}
+        <View style={{ position: "absolute", top: 10, right: 10 }}>
+          <IconButton
+            icon="delete"
+            iconColor="#FCA5A5" // Rojo suave
+            size={22}
+            onPress={() => confirmDeleteRoseta(item.rosette_mac)}
           />
+        </View>
+
+        {/* Ubicación como título */}
+        <Text
+          style={{
+            color: "white",
+            fontWeight: "bold",
+            fontSize: 18,
+            textAlign: "center",
+            marginBottom: 4,
+          }}
+        >
+          {item.rosette_ubication}
+        </Text>
+
+        {/* Ícono del dispositivo (centrado, grande) */}
+        <View style={{ alignItems: "center", marginBottom: 8 }}>
+          <IconButton
+            icon="router-wireless"
+            iconColor="#BFDBFE" // Azul claro
+            size={42}
+          />
+        </View>
+
+        {/* Botones de acción */}
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-around",
+            marginTop: 4,
+          }}
+        >
+          {/* Editar ubicación */}
+          <IconButton
+            icon="pencil"
+            iconColor="#F3F4F6"
+            size={22}
+            onPress={() =>
+              router.push({
+                pathname: "/edit_roseta",
+                params: {
+                  rosette_mac: item.rosette_mac,
+                  currentUbication: item.ubication || "",
+                },
+              })
+            }
+          />
+
+          {/* Sensor/Temperatura */}
+          <IconButton
+            icon="thermometer"
+            iconColor="#FCD34D"
+            size={22}
+            onPress={() =>
+              router.push({
+                pathname: "/sensors_roseta",
+                params: {
+                  mac: item.rosette_mac,
+                },
+              })
+            }
+          />
+
+          {/* Alertas */}
+          <IconButton
+            icon="alert-circle"
+            iconColor="#FBBF24"
+            size={22}
+            onPress={() =>
+              router.push({
+                pathname: "/notifications_screen",
+                params: {
+                  mac: item.rosette_mac,
+                },
+              })
+            }
+          />
+        </View>
+      </View>
+    );
+  }}
+/>
+
+
+
         )}
       </View>
 
@@ -291,6 +387,41 @@ const HomeScreen = () => {
             </Button>
             <Button onPress={handleLogout} textColor={colors.error}>
               Cerrar sesión
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
+
+      {/* Dialogo eliminar roseta */}
+      <Portal>
+        <Dialog
+          visible={deleteDialogVisible}
+          onDismiss={() => setDeleteDialogVisible(false)}
+          style={{ backgroundColor: colors.background }}
+        >
+          <Dialog.Title style={{ color: colors.colorLetter }}>
+            Confirmar eliminación
+          </Dialog.Title>
+          <Dialog.Content>
+            <Paragraph style={{ color: colors.colorLetter }}>
+              ¿Estás seguro de que quieres eliminar esta roseta?
+            </Paragraph>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button
+              onPress={() => setDeleteDialogVisible(false)}
+              textColor={colors.colorLetter}
+              disabled={deleting}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onPress={handleDeleteRoseta}
+              textColor={colors.error}
+              loading={deleting}
+              disabled={deleting}
+            >
+              Eliminar
             </Button>
           </Dialog.Actions>
         </Dialog>

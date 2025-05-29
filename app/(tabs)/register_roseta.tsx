@@ -1,102 +1,94 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, Text, Alert, StyleSheet } from 'react-native';
-import * as SecureStore from 'expo-secure-store';
+import { View, TextInput, TouchableOpacity, Text, Alert, Image } from 'react-native';
 import axios from 'axios';
-import { StorageService } from '../../services/storage.service'; // Asegúrate de importar correctamente
-
+import { StorageService } from '../../services/storage.service'; // Asegúrate que la ruta sea correcta
+import { theme } from '../../constants/theme'; // Importa el mismo theme para estilos consistentes
 
 const RegisterRosettaScreen = () => {
   const [ssid, setSsid] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   const sendCredentialsToESP32 = async () => {
-    console.log('[INFO] Iniciando envío de credenciales al ESP32...');
+    setError(null);
+    if (!ssid.trim() || !password.trim()) {
+      setError('SSID y contraseña no pueden estar vacíos.');
+      return;
+    }
+
     Alert.alert('Info', 'Enviando credenciales al ESP32...');
+    try {
+      const response = await fetch('http://192.168.4.1/set-wifi-credentials', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ wifi_ssid: ssid.trim(), wifi_password: password.trim() }),
+      });
 
-    console.log('[INFO] SSID:', ssid);
-    console.log('[INFO] Password:', password);
-
-    const response = await fetch('http://192.168.4.1/set-wifi-credentials', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        wifi_ssid: ssid,
-        wifi_password: password,
-      }),
-    });
-
-    const data = await response.json();
-    console.log('[RESPUESTA ESP32]:', data);
-    Alert.alert('Respuesta del ESP32', data.message || 'Sin mensaje');
+      const data = await response.json();
+      Alert.alert('Respuesta del ESP32', data.message || 'Sin mensaje');
+    } catch (err) {
+      Alert.alert('Error', 'No se pudo conectar con el ESP32');
+    }
   };
 
   const registerRosetta = async () => {
-    console.log('[INFO] Registrando roseta en el backend...');
-    Alert.alert('Info', 'Registrando roseta...');
-
+    setError(null);
     try {
       const token = await StorageService.getItem('userToken');
-
-      console.log('[INFO] Token JWT obtenido:', token);
-
       const response = await axios.post(
         'http://192.168.0.10:3000/roseta/register',
         {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      console.log('[SUCCESS] Roseta registrada:', response.data);
       Alert.alert('Registro exitoso', response.data.msg);
     } catch (error) {
-      console.error('[ERROR] Fallo al registrar la roseta:', error);
       Alert.alert('Error', 'No se pudo registrar la roseta');
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text>SSID:</Text>
+    <View style={theme.containerTerciario}>
+      <Image
+        source={require('../../assets/images/logo3.png')}
+        style={theme.logoTerciario}
+        resizeMode="contain"
+      />
+      <Text style={theme.title}>Registrar Roseta</Text>
+
+      <Text style={theme.label}>SSID:</Text>
       <TextInput
-        style={styles.input}
+        style={[theme.input, error ? theme.errorText : undefined]}
         value={ssid}
-        onChangeText={setSsid}
+        onChangeText={(text) => {
+          setSsid(text);
+          if (error) setError(null);
+        }}
         placeholder="Nombre de tu red WiFi"
       />
 
-      <Text>Contraseña:</Text>
+      <Text style={theme.label}>Contraseña:</Text>
       <TextInput
-        style={styles.input}
+        style={[theme.input, error ? theme.errorText : undefined]}
         value={password}
-        onChangeText={setPassword}
-        secureTextEntry
+        onChangeText={(text) => {
+          setPassword(text);
+          if (error) setError(null);
+        }}
         placeholder="Contraseña WiFi"
+        secureTextEntry
       />
 
-      <Button title="Enviar credenciales al ESP32" onPress={sendCredentialsToESP32} />
+      {error && <Text style={theme.errorText}>{error}</Text>}
 
-      <View style={{ marginTop: 20 }}>
-        <Button title="Registrar Roseta" onPress={registerRosetta} />
-      </View>
+      <TouchableOpacity style={theme.buttonRegister} onPress={sendCredentialsToESP32}>
+        <Text style={theme.buttonRegisterText}>Enviar credenciales al ESP32</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={[theme.buttonRegister, { marginTop: 15 }]} onPress={registerRosetta}>
+        <Text style={theme.buttonRegisterText}>Registrar Roseta</Text>
+      </TouchableOpacity>
     </View>
   );
 };
 
 export default RegisterRosettaScreen;
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 16,
-  },
-  input: {
-    borderWidth: 1,
-    marginBottom: 12,
-    padding: 8,
-    borderRadius: 4,
-  },
-});
