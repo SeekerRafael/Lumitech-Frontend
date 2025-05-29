@@ -52,9 +52,6 @@ const HomeScreen = () => {
         }
       );
 
-      const json = await response.json();
-      console.log("Respuesta del backend:", json);
-
       if (!response.ok) throw new Error("Error al obtener dispositivos");
 
       const data = await response.json();
@@ -206,7 +203,8 @@ const HomeScreen = () => {
             keyExtractor={(item) => item.rosette_mac}
             style={{ marginTop: 20 }}
             renderItem={({ item }) => {
-              
+              const ubicacion = item.ubication;
+
               return (
                 <View
                   style={{
