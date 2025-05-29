@@ -2,44 +2,34 @@ import React, { useState } from 'react';
 import { View, TextInput, Button, Text, Alert, StyleSheet } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import axios from 'axios';
+import { StorageService } from '../../services/storage.service'; // Asegúrate de importar correctamente
+
 
 const RegisterRosettaScreen = () => {
   const [ssid, setSsid] = useState('');
   const [password, setPassword] = useState('');
-  const [credentialsSent, setCredentialsSent] = useState(false);
 
   const sendCredentialsToESP32 = async () => {
     console.log('[INFO] Iniciando envío de credenciales al ESP32...');
     Alert.alert('Info', 'Enviando credenciales al ESP32...');
 
-    try {
-      console.log('[INFO] SSID:', ssid);
-      console.log('[INFO] Password:', password);
+    console.log('[INFO] SSID:', ssid);
+    console.log('[INFO] Password:', password);
 
-      const response = await fetch('http://192.168.4.1/set-wifi-credentials', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          wifi_ssid: ssid,
-          wifi_password: password,
-        }),
-      });
+    const response = await fetch('http://192.168.4.1/set-wifi-credentials', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        wifi_ssid: ssid,
+        wifi_password: password,
+      }),
+    });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log('[SUCCESS] Respuesta del ESP32:', data);
-      Alert.alert('Info', 'Credenciales enviadas correctamente al ESP32');
-
-      setCredentialsSent(true);
-    } catch (error) {
-      console.error('[ERROR] Fallo al enviar credenciales al ESP32:', error);
-      Alert.alert('Error', 'Falló el envío de credenciales al ESP32');
-    }
+    const data = await response.json();
+    console.log('[RESPUESTA ESP32]:', data);
+    Alert.alert('Respuesta del ESP32', data.message || 'Sin mensaje');
   };
 
   const registerRosetta = async () => {
@@ -47,7 +37,8 @@ const RegisterRosettaScreen = () => {
     Alert.alert('Info', 'Registrando roseta...');
 
     try {
-      const token = await SecureStore.getItemAsync('jwt');
+      const token = await StorageService.getItem('userToken');
+
       console.log('[INFO] Token JWT obtenido:', token);
 
       const response = await axios.post(
@@ -89,12 +80,9 @@ const RegisterRosettaScreen = () => {
 
       <Button title="Enviar credenciales al ESP32" onPress={sendCredentialsToESP32} />
 
-      {credentialsSent && (
-        <View style={{ marginTop: 20 }}>
-          <Text>Credenciales enviadas al ESP32</Text>
-          <Button title="Registrar Roseta" onPress={registerRosetta} />
-        </View>
-      )}
+      <View style={{ marginTop: 20 }}>
+        <Button title="Registrar Roseta" onPress={registerRosetta} />
+      </View>
     </View>
   );
 };

@@ -172,6 +172,25 @@ export const AuthService = {
     }
   },
 
+  async getUserRosetas() {
+  try {
+    const token = await StorageService.getItem("userToken");
+    if (!token) throw new Error("No se encontró token de autenticación");
+
+    const response = await axios.get(`${API_URL}/rosetas`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data.rosetas; // Asumiendo que la respuesta tiene esta estructura
+  } catch (error) {
+    console.error("Error al obtener rosetas del usuario:", error);
+    throw error;
+  }
+},
+
+
   async logout() {
   try {
     // 1. Obtener el token actual para incluirlo en los headers
