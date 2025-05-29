@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { View, Text, TextInput, Image, TouchableOpacity, Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Constants from "expo-constants";
 import { theme } from "../../constants/theme";
+import Constants from "expo-constants";
 
 const BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
 
@@ -31,7 +31,7 @@ const EditRosetaScreen = () => {
       const token = await AsyncStorage.getItem("userToken");
 
       const response = await fetch(
-        `${BASE_URL || "http://192.168.0.10:3000"}/roseta/change-ubication`,
+        `${BASE_URL}/roseta/change-ubication`,
         {
           method: "PATCH",
           headers: {

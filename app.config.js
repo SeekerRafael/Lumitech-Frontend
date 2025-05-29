@@ -42,6 +42,7 @@ export default {
     },
     extra: {
         API_BASE_URL: process.env.API_BASE_URL,
+        ESP32_URL: process.env.ESP32_URL,
       },
   },
 };

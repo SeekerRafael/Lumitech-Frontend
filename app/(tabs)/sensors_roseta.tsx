@@ -12,6 +12,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { colors } from "../../constants/theme";
+import Constants from "expo-constants";
+
+const BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
+
 
 const SensorsRosetaScreen = () => {
   const { mac } = useLocalSearchParams();
@@ -24,7 +28,7 @@ const SensorsRosetaScreen = () => {
       const token = await AsyncStorage.getItem("userToken");
 
       const response = await fetch(
-        `${process.env.API_BASE_URL || "http://192.168.0.10:3000"}/roseta/sensor/${mac}`,
+        `${BASE_URL}/roseta/sensor/${mac}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

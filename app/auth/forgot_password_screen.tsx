@@ -66,7 +66,7 @@ export default function ForgotPasswordScreen() {
             resizeMode="contain"
           />
           <Text style={theme.appNameS}>Lumitech</Text>
-          <Text style={theme.title}>Registro</Text>
+          <Text style={theme.title}>Recuperar Contraseña</Text>
           <Text style={theme.label}>
             Ingresa tu email para recibir un código de verificación
           </Text>

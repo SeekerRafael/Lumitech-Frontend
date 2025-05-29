@@ -5,16 +5,21 @@ import {
   StyleSheet,
   ScrollView,
   ActivityIndicator,
+   TouchableOpacity,
 } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../../constants/theme";
+import Constants from "expo-constants";
 
 interface AlertData {
   message: string;
   timestamp: number;
 }
+
+const BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
+
 
 const NotificationsScreen = () => {
   const { mac } = useLocalSearchParams();
@@ -27,7 +32,7 @@ const NotificationsScreen = () => {
     const token = await AsyncStorage.getItem("userToken");
 
     const response = await fetch(
-      `${process.env.API_BASE_URL || "http://192.168.0.10:3000"}/roseta/alerts/${mac}`,
+      `${BASE_URL}/roseta/alerts/${mac}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -78,6 +83,10 @@ const NotificationsScreen = () => {
 
   return (
     <ScrollView style={styles.container}>
+      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+              <Ionicons name="arrow-back" size={24} color={colors.primary} />
+              <Text style={styles.backText}>Volver</Text>
+            </TouchableOpacity>
       <Text style={styles.title}>Alertas</Text>
 
       {loading ? (
@@ -141,5 +150,15 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#888",
     marginTop: 5,
+  },
+   backButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  backText: {
+    marginLeft: 6,
+    color: colors.primary,
+    fontWeight: "600",
   },
 });

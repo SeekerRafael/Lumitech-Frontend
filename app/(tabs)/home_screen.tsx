@@ -1,7 +1,7 @@
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
-import { IconButton } from "react-native-paper"; 
+import { IconButton } from "react-native-paper";
 import {
   ActivityIndicator,
   BackHandler,
@@ -16,6 +16,9 @@ import { colors, theme } from "../../constants/theme";
 import { AuthService } from "../auth/auth.service";
 import { useAuth } from "../hooks/useAuth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Constants from "expo-constants";
+
+const BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
 
 const HomeScreen = () => {
   const { user, isLoading, refreshUser } = useAuth();
@@ -27,7 +30,6 @@ const HomeScreen = () => {
   const [devicesLoading, setDevicesLoading] = useState(false);
   const [devicesError, setDevicesError] = useState<string | null>(null);
 
-  // Estado para dialogo de eliminar roseta
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [rosetaToDelete, setRosetaToDelete] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -48,14 +50,11 @@ const HomeScreen = () => {
 
       if (!token) throw new Error("No se encontró token de autenticación");
 
-      const response = await fetch(
-        `${process.env.API_BASE_URL || "http://192.168.0.10:3000"}/roseta/get-all-rosettes`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${BASE_URL}/roseta/get-all-rosettes`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (!response.ok) throw new Error("Error al obtener dispositivos");
 
@@ -92,7 +91,7 @@ const HomeScreen = () => {
       if (!token) throw new Error("No se encontró token de autenticación");
 
       const response = await fetch(
-        `${process.env.API_BASE_URL || "http://192.168.0.10:3000"}/roseta/remove-rosette/${rosetaToDelete}`,
+        `${BASE_URL}/roseta/remove-rosette/${rosetaToDelete}`,
         {
           method: "DELETE",
           headers: {
@@ -238,128 +237,128 @@ const HomeScreen = () => {
 
         {/* Mostrar dispositivos */}
         {devicesError ? (
-          <Text style={{ color: colors.error, marginTop: 20 }}>{devicesError}</Text>
+          <Text style={{ color: colors.error, marginTop: 20 }}>
+            {devicesError}
+          </Text>
         ) : devices.length === 0 ? (
-          <Text style={{ marginTop: 20 }}>No tienes dispositivos registrados.</Text>
+          <Text style={{ marginTop: 20 }}>
+            No tienes dispositivos registrados.
+          </Text>
         ) : (
           <FlatList
-  data={devices}
-  keyExtractor={(item) => item.rosette_mac}
-  contentContainerStyle={{ paddingBottom: 20 }}
-  style={{ marginTop: 20 }}
-  renderItem={({ item }) => {
-    return (
-      <View
-        style={{
-          backgroundColor: "#03045E", // Azul principal (Tailwind blue-500)
-          marginBottom: 16,
-          paddingVertical: 14,
-          paddingHorizontal: 20,
-          borderRadius: 16,
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 4,
-          elevation: 3,
-         width: 280, // ancho fijo de 350 píxeles
+            data={devices}
+            keyExtractor={(item) => item.rosette_mac}
+            contentContainerStyle={{ paddingBottom: 20 }}
+            style={{ marginTop: 20 }}
+            renderItem={({ item }) => {
+              return (
+                <View
+                  style={{
+                    backgroundColor: "#03045E", // Azul principal (Tailwind blue-500)
+                    marginBottom: 16,
+                    paddingVertical: 14,
+                    paddingHorizontal: 20,
+                    borderRadius: 16,
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
+                    elevation: 3,
+                    width: 280, // ancho fijo de 350 píxeles
 
-          alignSelf: "center",
-          position: "relative",
-        }}
-      >
+                    alignSelf: "center",
+                    position: "relative",
+                  }}
+                >
+                  <View style={{ position: "absolute", top: 10, right: 10 }}>
+                    <IconButton
+                      icon="delete"
+                      iconColor="#FCA5A5" // Rojo suave
+                      size={22}
+                      onPress={() => confirmDeleteRoseta(item.rosette_mac)}
+                    />
+                  </View>
 
-        <View style={{ position: "absolute", top: 10, right: 10 }}>
-          <IconButton
-            icon="delete"
-            iconColor="#FCA5A5" // Rojo suave
-            size={22}
-            onPress={() => confirmDeleteRoseta(item.rosette_mac)}
+                  {/* Ubicación como título */}
+                  <Text
+                    style={{
+                      color: "white",
+                      fontWeight: "bold",
+                      fontSize: 18,
+                      textAlign: "center",
+                      marginBottom: 4,
+                    }}
+                  >
+                    {item.rosette_ubication}
+                  </Text>
+
+                  {/* Ícono del dispositivo (centrado, grande) */}
+                  <View style={{ alignItems: "center", marginBottom: 8 }}>
+                    <IconButton
+                      icon="router-wireless"
+                      iconColor="#BFDBFE" // Azul claro
+                      size={42}
+                    />
+                  </View>
+
+                  {/* Botones de acción */}
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-around",
+                      marginTop: 4,
+                    }}
+                  >
+                    {/* Editar ubicación */}
+                    <IconButton
+                      icon="pencil"
+                      iconColor="#F3F4F6"
+                      size={22}
+                      onPress={() =>
+                        router.push({
+                          pathname: "/edit_roseta",
+                          params: {
+                            rosette_mac: item.rosette_mac,
+                            currentUbication: item.ubication || "",
+                          },
+                        })
+                      }
+                    />
+
+                    {/* Sensor/Temperatura */}
+                    <IconButton
+                      icon="thermometer"
+                      iconColor="#FCD34D"
+                      size={22}
+                      onPress={() =>
+                        router.push({
+                          pathname: "/sensors_roseta",
+                          params: {
+                            mac: item.rosette_mac,
+                          },
+                        })
+                      }
+                    />
+
+                    {/* Alertas */}
+                    <IconButton
+                      icon="alert-circle"
+                      iconColor="#FBBF24"
+                      size={22}
+                      onPress={() =>
+                        router.push({
+                          pathname: "/notifications_screen",
+                          params: {
+                            mac: item.rosette_mac,
+                          },
+                        })
+                      }
+                    />
+                  </View>
+                </View>
+              );
+            }}
           />
-        </View>
-
-        {/* Ubicación como título */}
-        <Text
-          style={{
-            color: "white",
-            fontWeight: "bold",
-            fontSize: 18,
-            textAlign: "center",
-            marginBottom: 4,
-          }}
-        >
-          {item.rosette_ubication}
-        </Text>
-
-        {/* Ícono del dispositivo (centrado, grande) */}
-        <View style={{ alignItems: "center", marginBottom: 8 }}>
-          <IconButton
-            icon="router-wireless"
-            iconColor="#BFDBFE" // Azul claro
-            size={42}
-          />
-        </View>
-
-        {/* Botones de acción */}
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-around",
-            marginTop: 4,
-          }}
-        >
-          {/* Editar ubicación */}
-          <IconButton
-            icon="pencil"
-            iconColor="#F3F4F6"
-            size={22}
-            onPress={() =>
-              router.push({
-                pathname: "/edit_roseta",
-                params: {
-                  rosette_mac: item.rosette_mac,
-                  currentUbication: item.ubication || "",
-                },
-              })
-            }
-          />
-
-          {/* Sensor/Temperatura */}
-          <IconButton
-            icon="thermometer"
-            iconColor="#FCD34D"
-            size={22}
-            onPress={() =>
-              router.push({
-                pathname: "/sensors_roseta",
-                params: {
-                  mac: item.rosette_mac,
-                },
-              })
-            }
-          />
-
-          {/* Alertas */}
-          <IconButton
-            icon="alert-circle"
-            iconColor="#FBBF24"
-            size={22}
-            onPress={() =>
-              router.push({
-                pathname: "/notifications_screen",
-                params: {
-                  mac: item.rosette_mac,
-                },
-              })
-            }
-          />
-        </View>
-      </View>
-    );
-  }}
-/>
-
-
-
         )}
       </View>
 

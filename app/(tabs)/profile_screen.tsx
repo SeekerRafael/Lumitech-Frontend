@@ -1,9 +1,12 @@
 import { useFocusEffect, useRouter } from "expo-router";
 import React from "react";
-import { Image, Text, View } from "react-native";
+import { Image, Text, View, TouchableOpacity, StyleSheet, } from "react-native";
 import { IconButton } from "react-native-paper";
 import { theme } from "../../constants/theme";
 import { useAuth } from "../hooks/useAuth";
+import { colors } from "../../constants/theme";
+
+import { Ionicons } from "@expo/vector-icons";
 const ProfileScreen = () => {
   const { user, refreshUser } = useAuth();
   const router = useRouter();
@@ -38,6 +41,10 @@ const ProfileScreen = () => {
 
   return (
     <View style={theme.containerSecundario}>
+      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+              <Ionicons name="arrow-back" size={24} color={colors.primary} />
+              <Text style={styles.backText}>Volver</Text>
+            </TouchableOpacity>
       <Image
         style={theme.logoTerciario}
         source={require("../../assets/images/logo3.png")}
@@ -91,3 +98,66 @@ const ProfileScreen = () => {
 };
 
 export default ProfileScreen;
+
+
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 20,
+    backgroundColor: "#fff",
+    flex: 1,
+  },
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: colors.primary,
+    marginBottom: 20,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginTop: 10,
+    color: "#333",
+  },
+  value: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#222",
+  },
+  timestamp: {
+    fontSize: 12,
+    color: "#666",
+    marginTop: 4,
+  },
+  card: {
+    backgroundColor: "#f5f5f5",
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 20,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  noDataText: {
+    fontSize: 16,
+    color: "#555",
+  },
+  backButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  backText: {
+    marginLeft: 6,
+    color: colors.primary,
+    fontWeight: "600",
+  },
+});

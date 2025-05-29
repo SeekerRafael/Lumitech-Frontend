@@ -19,6 +19,7 @@ import { MaterialIcons } from "@expo/vector-icons"; // Importar íconos
 const BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
 const API_URL = `${BASE_URL}/user`;
 
+
 export default function ResetPasswordScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
@@ -167,3 +168,13 @@ export default function ResetPasswordScreen() {
     </KeyboardAvoidingView>
   );
 }
+
+
+
+
+
+
+
+
+
+
